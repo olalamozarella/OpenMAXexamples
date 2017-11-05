@@ -2,8 +2,7 @@
 #define PORTINFO_H
 
 #include "TestCase.h"
-
-class OMX_PARAM_PORTDEFINITIONTYPE;
+#include "IL/OMX_Core.h"
 
 class PortInfo : public TestCase
 {
@@ -14,8 +13,10 @@ public:
     void Run();
 
 private:
-    void GetPortInfo( string componentName, int portNumber );
-    void PrintPortInfo( OMX_PARAM_PORTDEFINITIONTYPE* portdef );
+    bool GetComponentInfo( string componentName, OMX_HANDLETYPE* handle, OMX_VERSIONTYPE* specVersion );
+    void PrintPortInfo( OMX_HANDLETYPE& handle, int portNumber );
+
+    void PrintAllVideoPortsInfo( OMX_HANDLETYPE& handle, OMX_VERSIONTYPE& specVersion );
 };
 
 #endif // PORTINFO_H
