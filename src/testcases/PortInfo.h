@@ -3,6 +3,8 @@
 
 #include "TestCase.h"
 
+class OMX_PARAM_PORTDEFINITIONTYPE;
+
 class PortInfo : public TestCase
 {
 public:
@@ -10,6 +12,10 @@ public:
     virtual ~PortInfo();
 
     void Run();
+
+private:
+    void GetPortInfo( string componentName, int portNumber );
+    void PrintPortInfo( OMX_PARAM_PORTDEFINITIONTYPE* portdef );
 };
 
 #endif // PORTINFO_H
