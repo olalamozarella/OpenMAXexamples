@@ -26,6 +26,9 @@ void PortInfo::Run()
         return;
     }
 
+    GetPortInfo( "OMX.broadcom.image_decode", 320 );
+    GetPortInfo( "OMX.broadcom.image_decode", 321 );
+
     GetPortInfo( "OMX.broadcom.video_decode", 130 );
     GetPortInfo( "OMX.broadcom.video_decode", 131 );
 }
@@ -97,6 +100,6 @@ void PortInfo::PrintPortInfo( OMX_PARAM_PORTDEFINITIONTYPE* portdef )
     cout << " Domain is: " << domain << endl;
     cout << " Buffer count: " << portdef->nBufferCountActual << endl;
     cout << " Buffer minimal count: " << portdef->nBufferCountMin << endl;
-    cout << " Buffer size: " << portdef->nBufferSize << "bytes" << endl;
+    cout << " Buffer size: " << portdef->nBufferSize << "bytes" << endl << endl;
 }
 
