@@ -7,6 +7,7 @@
 #include "src/testcases/SystemInfo.h"
 #include "src/testcases/ListComponents.h"
 #include "src/testcases/PortInfo.h"
+#include "src/testcases/NoBuffers.h"
 
 using namespace std;
 
@@ -20,8 +21,11 @@ int main()
 //    ListComponents testCase;
 //    testCase.Run();
 
-    PortInfo portInfo;
-    portInfo.Run();
+//    PortInfo portInfo;
+//    portInfo.Run();
+
+    NoBuffers noBuffers;
+    noBuffers.Run();
 
     bcm_host_deinit();
 

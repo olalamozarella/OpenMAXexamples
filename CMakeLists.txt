@@ -22,19 +22,25 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DRASPBERRYPI -DOMX_SKIP64BIT")
 # List of all header files that belong to this project
 set( HEADERS
     src/ProjectDefines.h
+    src/CommonFunctions.h
     src/testcases/TestCase.h
     src/testcases/SystemInfo.h
     src/testcases/ListComponents.h
     src/testcases/PortInfo.h
+    src/testcases/NoBuffers.h
+    src/testcases/ImageDecode.h
 )
 
 # List of all source files that belong to this project
 set( SOURCES
     main.cpp
+    src/CommonFunctions.cpp
     src/testcases/TestCase.cpp
     src/testcases/SystemInfo.cpp
     src/testcases/ListComponents.cpp
     src/testcases/PortInfo.cpp
+    src/testcases/NoBuffers.cpp
+    src/testcases/ImageDecode.cpp
 )
 
 # Create executable with all necessary source and header files
