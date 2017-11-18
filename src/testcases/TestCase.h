@@ -2,7 +2,7 @@
 #define TESTCASE_H
 
 #include <string>
-#include "src/ProjectDefines.h"
+#include "src/core/ProjectDefines.h"
 
 using namespace std;
 

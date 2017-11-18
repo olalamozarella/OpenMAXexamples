@@ -3,7 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 #include "IL/OMX_Component.h"
-#include "src/CommonFunctions.h"
+#include "src/core/CommonFunctions.h"
 
 using namespace std;
 
@@ -79,7 +79,7 @@ OMX_ERRORTYPE NoBuffers::DataClass::EventHandler( OMX_HANDLETYPE /*hComponent*/,
 }
 
 NoBuffers::NoBuffers()
-    : TestCase( TESTCASE_NAME_NONWORKING )
+    : TestCase( TESTCASE_NAME_NOBUFFERS )
 {
 
 }

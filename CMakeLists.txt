@@ -21,26 +21,35 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DRASPBERRYPI -DOMX_SKIP64BIT")
 
 # List of all header files that belong to this project
 set( HEADERS
-    src/ProjectDefines.h
-    src/CommonFunctions.h
+    src/core/ProjectDefines.h
+    src/core/CommonFunctions.h
+    src/core/Component.h
+    src/core/Logger.h
+    src/core/Callbacks.h
     src/testcases/TestCase.h
     src/testcases/SystemInfo.h
     src/testcases/ListComponents.h
     src/testcases/PortInfo.h
     src/testcases/NoBuffers.h
     src/testcases/ImageDecode.h
+    src/testcases/BuffersNoIL.h
+    src/components/DecoderH264.h
 )
 
 # List of all source files that belong to this project
 set( SOURCES
     main.cpp
-    src/CommonFunctions.cpp
+    src/core/CommonFunctions.cpp
+    src/core/Component.cpp
+    src/core/Logger.cpp
     src/testcases/TestCase.cpp
     src/testcases/SystemInfo.cpp
     src/testcases/ListComponents.cpp
     src/testcases/PortInfo.cpp
     src/testcases/NoBuffers.cpp
     src/testcases/ImageDecode.cpp
+    src/testcases/BuffersNoIL.cpp
+    src/components/DecoderH264.cpp
 )
 
 # Create executable with all necessary source and header files
@@ -54,6 +63,7 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/include
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/include/interface/vcos/pthreads
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/include/interface/vmcs_host/linux
+  ${CMAKE_FIND_ROOT_PATH}/opt/vc/src/hello_pi/libs/ilclient/
 )
 
 # Link all needed libraries

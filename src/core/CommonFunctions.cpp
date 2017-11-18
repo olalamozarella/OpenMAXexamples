@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <sstream>
 
 #include "IL/OMX_Component.h"
 
@@ -9,31 +10,6 @@ using namespace std;
 
 CommonFunctions::CommonFunctions()
 {
-}
-
-bool CommonFunctions::DisableSomePorts( OMX_HANDLETYPE handle, OMX_INDEXTYPE indexType )
-{
-    cout << "Disabling ports with type " << indexType << endl;
-
-    OMX_PORT_PARAM_TYPE param;
-    memset( &param, 0, sizeof( OMX_PORT_PARAM_TYPE ) );
-    param.nSize = sizeof( OMX_PORT_PARAM_TYPE );
-    param.nVersion.nVersion = OMX_VERSION;
-
-    OMX_ERRORTYPE err = OMX_GetParameter( handle, indexType, &param );
-    if ( err != OMX_ErrorNone ) {
-        cout << ErrorToString( err ) << endl;
-        return false;
-    }
-
-    int firstPort = param.nStartPortNumber;
-    int portCount = param.nPorts;
-    for ( int portNumber = firstPort; portNumber < firstPort + portCount; portNumber++ ) {
-        OMX_SendCommand( handle, OMX_CommandPortDisable, portNumber, NULL );
-    }
-
-    cout << "All ports with type " << indexType << " disabled" << endl;
-    return true;
 }
 
 std::string CommonFunctions::ErrorToString( int errorID )
@@ -118,6 +94,26 @@ std::string CommonFunctions::ErrorToString( int errorID )
     }
 }
 
+string CommonFunctions::StateToString( OMX_STATETYPE state )
+{
+    switch ( state ) {
+        case OMX_StateExecuting:
+            return "OMX_StateExecuting";
+        case OMX_StateIdle:
+            return "OMX_StateIdle";
+        case OMX_StateInvalid:
+            return "OMX_StateInvalid";
+        case OMX_StateLoaded:
+            return "OMX_StateLoaded";
+        case OMX_StateWaitForResources:
+            return "OMX_StateWaitForResources";
+        case OMX_StatePause:
+            return "OMX_StatePause";
+        default:
+            return "Other OMX_STATETYPE: " + state;
+    }
+}
+
 std::string CommonFunctions::GetComponentState( OMX_HANDLETYPE handle )
 {
     OMX_STATETYPE state;
@@ -151,17 +147,67 @@ bool CommonFunctions::DisableAllPorts( OMX_HANDLETYPE handle )
 {
     cout << "Trying to disable all ports" << endl;
 
-    bool ok = true;
-    ok &= DisableSomePorts( handle, OMX_IndexParamVideoInit );
-    ok &= DisableSomePorts( handle, OMX_IndexParamImageInit );
-    ok &= DisableSomePorts( handle, OMX_IndexParamAudioInit );
-    ok &= DisableSomePorts( handle, OMX_IndexParamOtherInit );
+    OMX_INDEXTYPE types[] = {OMX_IndexParamAudioInit, OMX_IndexParamVideoInit, OMX_IndexParamImageInit, OMX_IndexParamOtherInit};
 
-    if ( ok == false ) {
-        cout << "Error disabling ports" << endl;
-        return false;
+    for ( int i = 0; i < 4; i++ ) {
+        cout << "Disabling ports with type " << i << endl;
+
+        OMX_PORT_PARAM_TYPE param;
+        memset( &param, 0, sizeof( OMX_PORT_PARAM_TYPE ) );
+        param.nSize = sizeof( OMX_PORT_PARAM_TYPE );
+        param.nVersion.nVersion = OMX_VERSION;
+
+        OMX_ERRORTYPE err = OMX_GetParameter( handle, types[i], &param );
+        if ( err != OMX_ErrorNone ) {
+            cout << ErrorToString( err ) << endl;
+            return false;
+        }
+
+        int firstPort = param.nStartPortNumber;
+        int portCount = param.nPorts;
+        for ( int portNumber = firstPort; portNumber < firstPort + portCount; portNumber++ ) {
+            OMX_SendCommand( handle, OMX_CommandPortDisable, portNumber, NULL );
+        }
     }
-
     cout << "All ports disabled" << endl;
 }
 
+void CommonFunctions::InitStructure( OMX_PORT_PARAM_TYPE& structure )
+{
+    memset( &structure, 0, sizeof( OMX_PORT_PARAM_TYPE ) );
+    structure.nSize = sizeof( OMX_PORT_PARAM_TYPE );
+    structure.nVersion.nVersion = OMX_VERSION;
+    structure.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
+    structure.nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
+    structure.nVersion.s.nRevision = OMX_VERSION_REVISION;
+    structure.nVersion.s.nStep = OMX_VERSION_STEP;
+}
+
+void CommonFunctions::InitStructure( OMX_VIDEO_PARAM_PORTFORMATTYPE& structure )
+{
+    memset( &structure, 0, sizeof( OMX_VIDEO_PARAM_PORTFORMATTYPE ) );
+    structure.nSize = sizeof( OMX_VIDEO_PARAM_PORTFORMATTYPE );
+    structure.nVersion.nVersion = OMX_VERSION;
+    structure.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
+    structure.nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
+    structure.nVersion.s.nRevision = OMX_VERSION_REVISION;
+    structure.nVersion.s.nStep = OMX_VERSION_STEP;
+}
+
+void CommonFunctions::InitStructure( OMX_PARAM_PORTDEFINITIONTYPE& structure )
+{
+    memset( &structure, 0, sizeof( OMX_PARAM_PORTDEFINITIONTYPE ) );
+    structure.nSize = sizeof( OMX_PARAM_PORTDEFINITIONTYPE );
+    structure.nVersion.nVersion = OMX_VERSION;
+    structure.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
+    structure.nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
+    structure.nVersion.s.nRevision = OMX_VERSION_REVISION;
+    structure.nVersion.s.nStep = OMX_VERSION_STEP;
+}
+
+string CommonFunctions::IntToString( int a )
+{
+    stringstream s;
+    s << a;
+    return s.str();
+}
