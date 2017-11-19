@@ -9,5 +9,5 @@ DecoderH264::DecoderH264()
 
 bool DecoderH264::SetVideoParameters()
 {
-    return false;
+    return true;
 }

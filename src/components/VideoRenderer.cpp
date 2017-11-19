@@ -7,6 +7,6 @@ VideoRenderer::VideoRenderer()
 
 bool VideoRenderer::SetRenderParameters()
 {
-    return false;
+    return true;
 }
 

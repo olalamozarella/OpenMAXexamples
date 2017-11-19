@@ -7,7 +7,7 @@ class VideoDecodeRender : public TestCase
 {
 public:
     VideoDecodeRender();
-    virtual ~VideoDecodeRender();
+    ~VideoDecodeRender();
 
     void Init();
     void Run();
