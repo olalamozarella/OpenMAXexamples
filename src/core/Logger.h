@@ -3,18 +3,19 @@
 
 #include <iostream>
 
-#define LOG_INFO Logger::Info
-#define LOG_WARN Logger::Warning
-#define LOG_ERR  Logger::Error
+#define LOG_INFO(x) Logger::Info(x, __FILE__, __LINE__)
+#define LOG_WARN(x) Logger::Warning(x, __FILE__, __LINE__)
+#define LOG_ERR(x) Logger::Error(x, __FILE__, __LINE__)
 
 class Logger
 {
 public:
-    static void Info( std::string message );
-    static void Warning( std::string message );
-    static void Error( std::string message );
+    static void Info( std::string message, std::string file, int lineNumber );
+    static void Warning( std::string message, std::string file, int lineNumber );
+    static void Error( std::string message, std::string file, int lineNumber );
 private:
     Logger();
+    static void PrintCurrentTime();
 };
 
 #endif // LOGGER_H
