@@ -9,6 +9,7 @@
 #include "src/testcases/PortInfo.h"
 #include "src/testcases/NoBuffers.h"
 #include "src/testcases/BuffersNoIL.h"
+#include "src/testcases/VideoDecodeRender.h"
 
 using namespace std;
 
@@ -28,10 +29,15 @@ int main()
 //    NoBuffers noBuffers;
 //    noBuffers.Run();
 
-    BuffersNoIL buffersNoIL;
-    buffersNoIL.Init();
-    buffersNoIL.Run();
-    buffersNoIL.Destroy();
+//    BuffersNoIL buffersNoIL;
+//    buffersNoIL.Init();
+//    buffersNoIL.Run();
+//    buffersNoIL.Destroy();
+
+    VideoDecodeRender testcase;
+    testcase.Init();
+    testcase.Run();
+    testcase.Destroy();
 
     bcm_host_deinit();
 

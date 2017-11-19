@@ -8,7 +8,10 @@ class DecoderH264 : public Component
 public:
     DecoderH264();
 
-    void SetVideoParameters();
+    static const int InputPort = 130;
+    static const int OutputPort = 131;
+
+    bool SetVideoParameters();
 };
 
 #endif // DECODERH264_H

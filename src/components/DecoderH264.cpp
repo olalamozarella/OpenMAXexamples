@@ -5,10 +5,9 @@
 DecoderH264::DecoderH264()
     : Component( "OMX.broadcom.video_decode" )
 {
-
 }
 
-void DecoderH264::SetVideoParameters()
+bool DecoderH264::SetVideoParameters()
 {
-
+    return false;
 }

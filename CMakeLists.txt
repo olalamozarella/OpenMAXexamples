@@ -28,6 +28,7 @@ set( HEADERS
     src/core/Callbacks.h
     src/core/Timer.h
     src/core/EventLocker.h
+    src/core/Tunnel.h
     src/testcases/TestCase.h
     src/testcases/SystemInfo.h
     src/testcases/ListComponents.h
@@ -35,7 +36,9 @@ set( HEADERS
     src/testcases/NoBuffers.h
     src/testcases/ImageDecode.h
     src/testcases/BuffersNoIL.h
+    src/testcases/VideoDecodeRender.h
     src/components/DecoderH264.h
+    src/components/VideoRenderer.h
 )
 
 # List of all source files that belong to this project
@@ -46,6 +49,7 @@ set( SOURCES
     src/core/Logger.cpp
     src/core/Timer.cpp
     src/core/EventLocker.cpp
+    src/core/Tunnel.cpp
     src/testcases/TestCase.cpp
     src/testcases/SystemInfo.cpp
     src/testcases/ListComponents.cpp
@@ -53,7 +57,9 @@ set( SOURCES
     src/testcases/NoBuffers.cpp
     src/testcases/ImageDecode.cpp
     src/testcases/BuffersNoIL.cpp
+    src/testcases/VideoDecodeRender.cpp
     src/components/DecoderH264.cpp
+    src/components/VideoRenderer.cpp
 )
 
 # Create executable with all necessary source and header files

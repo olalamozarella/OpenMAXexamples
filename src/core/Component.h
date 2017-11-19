@@ -30,6 +30,7 @@ public:
     bool DisablePortBuffers( const OMX_U32 port );
 
     bool UseBuffer( OMX_BUFFERHEADERTYPE* bufferHeader, OMX_U32 portIndex, OMX_U32 bufferSize, OMX_U8* buffer );
+    bool EmptyThisBuffer( OMX_BUFFERHEADERTYPE* buffer );
 
     // static callbacks, passed to component in Init()
     static OMX_ERRORTYPE EventHandlerCallback( OMX_IN OMX_HANDLETYPE componentHandle, OMX_IN OMX_PTR appData, OMX_IN OMX_EVENTTYPE event,
@@ -43,9 +44,7 @@ public:
     virtual OMX_ERRORTYPE emptyBufferDone( OMX_BUFFERHEADERTYPE* bufferHeader );
 
     void WaitForEvent( OMX_EVENTTYPE eventType, OMX_U32 data1, OMX_U32 data2, int msTimeout );
-
-protected:
-    static void OnTimeout();
+    bool GetInputBuffer( OMX_U32 port, OMX_BUFFERHEADERTYPE*& buffer );
 
 private:
     class DataClass;
