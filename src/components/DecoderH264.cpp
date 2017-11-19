@@ -7,3 +7,8 @@ DecoderH264::DecoderH264()
 {
 
 }
+
+void DecoderH264::SetVideoParameters()
+{
+
+}

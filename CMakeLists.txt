@@ -6,7 +6,7 @@
 #Add every class to HEADERS and SOURCES, otherwise it wont be displayed in QTCreator project.
 #Add external libraries with TARGET_LINK_LIBRARIES()
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 project(cmake-test-qtcreator)
 
@@ -15,7 +15,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 # Compile flags
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 set(COMPILE_DEFINITIONS -Werror)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DRASPBERRYPI -DOMX_SKIP64BIT")
 
@@ -26,6 +26,8 @@ set( HEADERS
     src/core/Component.h
     src/core/Logger.h
     src/core/Callbacks.h
+    src/core/Timer.h
+    src/core/EventLocker.h
     src/testcases/TestCase.h
     src/testcases/SystemInfo.h
     src/testcases/ListComponents.h
@@ -42,6 +44,8 @@ set( SOURCES
     src/core/CommonFunctions.cpp
     src/core/Component.cpp
     src/core/Logger.cpp
+    src/core/Timer.cpp
+    src/core/EventLocker.cpp
     src/testcases/TestCase.cpp
     src/testcases/SystemInfo.cpp
     src/testcases/ListComponents.cpp
@@ -58,6 +62,10 @@ add_executable(${PROJECT_NAME}
     ${SOURCES}
 )
 
+# pthreads things
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 # Include directories
 INCLUDE_DIRECTORIES(
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/include
@@ -70,4 +78,5 @@ INCLUDE_DIRECTORIES(
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libbcm_host.so
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libopenmaxil.so
+  Threads::Threads
 )

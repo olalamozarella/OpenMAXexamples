@@ -44,6 +44,9 @@ public:
 
     void WaitForEvent( OMX_EVENTTYPE eventType, OMX_U32 data1, OMX_U32 data2, int msTimeout );
 
+protected:
+    static void OnTimeout();
+
 private:
     class DataClass;
     DataClass* d;

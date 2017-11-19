@@ -8,7 +8,7 @@ class DecoderH264 : public Component
 public:
     DecoderH264();
 
-    SetVideoParameters();
+    void SetVideoParameters();
 };
 
 #endif // DECODERH264_H

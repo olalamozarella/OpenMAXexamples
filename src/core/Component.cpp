@@ -5,18 +5,23 @@
 #include <list>
 #include <map>
 #include <cstdlib>
+#include <unistd.h>
 
 #include "Callbacks.h"
 #include "CommonFunctions.h"
 #include "Logger.h"
+#include "Timer.h"
+#include "EventLocker.h"
 
 using namespace std;
 
 class Component::DataClass
 {
 public:
-    DataClass();
+    DataClass( Component* owner );
     ~DataClass();
+
+    Component* dataclassOwner;
 
     OMX_ERRORTYPE DisableAllPorts();
 
@@ -28,17 +33,20 @@ public:
     list<FillBufferDone> fillBufferDoneList;
 
     map<OMX_U32, list<OMX_BUFFERHEADERTYPE*> > buffers;
+
+    Timer waitForEventTimer;
+    EventLocker eventLocker;
 };
 
-Component::DataClass::DataClass()
+Component::DataClass::DataClass( Component* owner )
 {
+    dataclassOwner = owner;
     componentHandle = NULL;
     componentName = NULL;
 }
 
 Component::DataClass::~DataClass()
 {
-
 }
 
 OMX_ERRORTYPE Component::DataClass::DisableAllPorts()
@@ -48,8 +56,6 @@ OMX_ERRORTYPE Component::DataClass::DisableAllPorts()
 
     OMX_INDEXTYPE types[] = { OMX_IndexParamAudioInit, OMX_IndexParamVideoInit, OMX_IndexParamImageInit, OMX_IndexParamOtherInit };
     for ( int i = 0; i < 4; i++ ) {
-        LOG_INFO( "Disabling port with type: " + INT2STR( i ) );
-
         OMX_PORT_PARAM_TYPE param;
         CommonFunctions::InitStructure( param );
 
@@ -61,7 +67,9 @@ OMX_ERRORTYPE Component::DataClass::DisableAllPorts()
         int firstPort = param.nStartPortNumber;
         int portCount = param.nPorts;
         for ( int portNumber = firstPort; portNumber < firstPort + portCount; portNumber++ ) {
+            LOG_INFO( "Disabling port " + INT2STR( portNumber ) );
             OMX_SendCommand( componentHandle, OMX_CommandPortDisable, portNumber, NULL );
+            dataclassOwner->WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortDisable, portNumber, 0 );
         }
     }
 
@@ -71,7 +79,7 @@ OMX_ERRORTYPE Component::DataClass::DisableAllPorts()
 
 Component::Component( const string& name )
 {
-    d = new DataClass();
+    d = new DataClass( this );
 
     d->componentName = new char[ name.size() + 1 ];
     copy( name.begin(), name.end(), d->componentName );
@@ -91,6 +99,12 @@ OMX_HANDLETYPE Component::GetHandle()
 
 bool Component::Init()
 {
+    bool ok = d->eventLocker.Init();
+    if ( ok == false ) {
+        LOG_ERR( "Error init eventLocker" );
+        return false;
+    }
+
     OMX_CALLBACKTYPE callbacks;
     callbacks.EmptyBufferDone = EmptyBufferDoneCallback;
     callbacks.FillBufferDone = FillBufferDoneCallback;
@@ -113,6 +127,12 @@ bool Component::Init()
 
 bool Component::DeInit()
 {
+    bool ok = d->eventLocker.Deinit();
+    if ( ok == false ) {
+        LOG_ERR( "Error deinit eventLocker" );
+        return false;
+    }
+
     OMX_ERRORTYPE err = OMX_FreeHandle( d->componentHandle );
     if ( err != OMX_ErrorNone ) {
         LOG_ERR( "OMX_FreeHandle failed: " + CommonFunctions::ErrorToString( err ) );
@@ -164,6 +184,8 @@ bool Component::ChangeState( const OMX_STATETYPE state )
         LOG_ERR( "Change state failed: " + CommonFunctions::ErrorToString( err ) );
         return false;
     }
+
+    WaitForEvent( OMX_EventCmdComplete, OMX_CommandStateSet, state, 0 );
 
     return true;
 }
@@ -392,7 +414,23 @@ OMX_ERRORTYPE Component::eventHandler( OMX_EVENTTYPE eventType, OMX_U32 data1, O
     event.data2 = data2;
     event.eventData = eventData;
 
+    bool ok = d->eventLocker.Lock();
+    if ( ok == false ) {
+        LOG_ERR( "EventHandler - cannot lock eventLocker" );
+    }
+
+    //LOG_WARN( "Storing event - data2: " + INT2STR(data2) );
     d->eventList.push_back( event );
+
+    ok = d->eventLocker.Unlock();
+    if ( ok == false ) {
+        LOG_ERR( "EventHandler - cannot unlock eventLocker" );
+    }
+
+    ok = d->eventLocker.BroadcastEvent();
+    if ( ok == false ) {
+        LOG_ERR( "EventHandler - cannot broadcast event" );
+    }
 
     return OMX_ErrorNone;
 }
@@ -415,23 +453,45 @@ OMX_ERRORTYPE Component::emptyBufferDone( OMX_BUFFERHEADERTYPE* bufferHeader )
     return OMX_ErrorNone;
 }
 
-void Component::WaitForEvent( OMX_EVENTTYPE eventType, OMX_U32 data1, OMX_U32 data2, int /*msTimeout*/ )
+void Component::WaitForEvent( OMX_EVENTTYPE eventType, OMX_U32 data1, OMX_U32 data2, int msTimeout )
 {
     LOG_INFO( "Waiting for event" );
-    int cycleNumber = 0;
 
-    bool foundEvent = false;
-    while ( foundEvent == false ) {
-        cycleNumber++;
+    bool foundMatch = false;
+    while ( foundMatch == false ) {
+        bool ok = d->eventLocker.Lock();
+        if ( ok == false ) {
+            LOG_ERR( "Cannot lock eventLocker" );
+            return;
+        }
+
         for ( list<Event>::iterator iter = d->eventList.begin(); iter != d->eventList.end(); iter++ ) {
             if ( ( iter->eventType == eventType ) && ( iter->data1 == data1 ) && ( iter->data2 == data2 ) ) {
-                foundEvent = true;
+                foundMatch = true;
                 d->eventList.erase( iter );
-                LOG_INFO( "Found event! Cycle: " + INT2STR( cycleNumber ) );
                 break;
             }
         }
+
+        ok = d->eventLocker.Unlock();
+        if ( ok == false ) {
+            LOG_ERR( "Cannot unlock eventLocker" );
+            return;
+        }
+
+        if ( foundMatch == false ) {
+            ok = d->eventLocker.WaitForEvent();
+            if ( ok == false ) {
+                LOG_ERR( "error waiting for event" );
+                return;
+            }
+        }
     }
+}
+
+void Component::OnTimeout()
+{
+    LOG_WARN( "tadaaaaa" );
 }
 
 string Component::GetComponentState()
