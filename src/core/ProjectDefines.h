@@ -9,5 +9,9 @@
 #define TESTCASE_NAME_BUFFERS_NOIL              "BuffersNoIL"
 #define TESTCASE_NAME_VIDEO_DECODE_RENDER       "VideoDecodeRender"
 
+#define EVENT_HANDLER_TIMEOUT_MS_DEFAULT           5
+#define EVENT_HANDLER_TIMEOUT_MS_MAX               1000
+#define EVENT_HANDLER_NO_TIMEOUT                   0
+
 #endif // PROJECTDEFINES_H
 

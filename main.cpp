@@ -29,15 +29,15 @@ int main()
 //    NoBuffers noBuffers;
 //    noBuffers.Run();
 
-    BuffersNoIL buffersNoIL;
-    buffersNoIL.Init();
-    buffersNoIL.Run();
-    buffersNoIL.Destroy();
+//    BuffersNoIL buffersNoIL;
+//    buffersNoIL.Init();
+//    buffersNoIL.Run();
+//    buffersNoIL.Destroy();
 
-//    VideoDecodeRender testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
+    VideoDecodeRender testcase;
+    testcase.Init();
+    testcase.Run();
+    testcase.Destroy();
 
     bcm_host_deinit();
 

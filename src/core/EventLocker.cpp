@@ -6,7 +6,8 @@
 #include "Logger.h"
 #include "CommonFunctions.h"
 
-#define DEFAULT_TIMEOUT_VALUE_MS      5
+
+#define NANOSECONDS_IN_SECOND         1000000000
 
 class EventLocker::DataClass
 {
@@ -46,7 +47,7 @@ bool EventLocker::Init()
     }
 
     result = pthread_mutex_init( &d->conditionMutex, NULL );
-    if ( result != 0 ){
+    if ( result != 0 ) {
         LOG_ERR( "EventLocker - conditionMutex init failed: " + INT2STR( result ) );
         pthread_mutex_destroy( &d->mutex );
         return false;
@@ -81,10 +82,10 @@ bool EventLocker::Lock()
     struct timeval now;
     gettimeofday( &now, NULL );
     timeToWait.tv_sec = now.tv_sec;
-    timeToWait.tv_nsec = now.tv_usec + DEFAULT_TIMEOUT_VALUE_MS * 1000;
+    timeToWait.tv_nsec = ( now.tv_usec + EVENT_HANDLER_TIMEOUT_MS_DEFAULT * 1000 ) * 1000;
 
     int result = pthread_mutex_timedlock( &d->mutex, &timeToWait );
-    if ( result != 0 ){
+    if ( result != 0 ) {
         LOG_ERR( "EventLocker - timedLock failed: " + INT2STR( result ) );
         return false;
     }
@@ -95,7 +96,7 @@ bool EventLocker::Lock()
 bool EventLocker::Unlock()
 {
     int result = pthread_mutex_unlock( &d->mutex );
-    if ( result != 0 ){
+    if ( result != 0 ) {
         LOG_ERR( "EventLocker - unlock failed: " + INT2STR( result ) );
         return false;
     }
@@ -103,16 +104,27 @@ bool EventLocker::Unlock()
     return true;
 }
 
-bool EventLocker::WaitForEvent()
+bool EventLocker::WaitForEvent( int msTimeout )
 {
     struct timespec timeToWait;
     struct timeval now;
     gettimeofday( &now, NULL );
     timeToWait.tv_sec = now.tv_sec;
-    timeToWait.tv_nsec = now.tv_usec + DEFAULT_TIMEOUT_VALUE_MS * 1000;
+    if ( msTimeout == EVENT_HANDLER_TIMEOUT_MS_MAX ){
+        timeToWait.tv_nsec = ( now.tv_usec + EVENT_HANDLER_TIMEOUT_MS_MAX * 1000 ) * 1000;
+    } else if ( msTimeout == EVENT_HANDLER_TIMEOUT_MS_DEFAULT ){
+        timeToWait.tv_nsec = ( now.tv_usec + EVENT_HANDLER_TIMEOUT_MS_DEFAULT * 1000 ) * 1000;
+    } else {
+        timeToWait.tv_nsec = ( now.tv_usec + msTimeout * 1000 ) * 1000;
+    }
+
+    while ( timeToWait.tv_nsec > NANOSECONDS_IN_SECOND ){
+        timeToWait.tv_nsec -= NANOSECONDS_IN_SECOND;
+        timeToWait.tv_sec++;
+    }
 
     int result = pthread_cond_timedwait( &d->condition, &d->conditionMutex, &timeToWait );
-    if ( result != 0 ){
+    if ( result != 0 ) {
         LOG_ERR( "EventLocker - timedWait failed: " + INT2STR( result ) );
         return false;
     }
@@ -123,7 +135,7 @@ bool EventLocker::WaitForEvent()
 bool EventLocker::BroadcastEvent()
 {
     int result = pthread_cond_broadcast( &d->condition );
-    if ( result != 0 ){
+    if ( result != 0 ) {
         LOG_ERR( "EventLocker - broadcast failed: " + INT2STR( result ) );
         return false;
     }

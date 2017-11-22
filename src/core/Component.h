@@ -11,6 +11,7 @@ public:
     virtual ~Component();
 
     OMX_HANDLETYPE GetHandle();
+    std::string GetComponentName();
 
     std::string GetComponentState();
 
@@ -28,6 +29,7 @@ public:
 
     bool EnablePortBuffers( const OMX_U32 port );
     bool DisablePortBuffers( const OMX_U32 port );
+    bool GetBufferCount( const OMX_U32 port, int& actualCount, int& allocatedCount );
 
     bool UseBuffer( OMX_BUFFERHEADERTYPE* bufferHeader, OMX_U32 portIndex, OMX_U32 bufferSize, OMX_U8* buffer );
     bool EmptyThisBuffer( OMX_BUFFERHEADERTYPE* buffer );
@@ -43,8 +45,10 @@ public:
     virtual OMX_ERRORTYPE fillBufferDone( OMX_BUFFERHEADERTYPE* bufferHeader );
     virtual OMX_ERRORTYPE emptyBufferDone( OMX_BUFFERHEADERTYPE* bufferHeader );
 
-    void WaitForEvent( OMX_EVENTTYPE eventType, OMX_U32 data1, OMX_U32 data2, int msTimeout );
+    bool WaitForEvent( OMX_EVENTTYPE eventType, OMX_U32 data1, OMX_U32 data2, int msTimeout );
+    bool WaitForEmptyBufferDone( int msTimeout ) ;
     bool GetInputBuffer( OMX_U32 port, OMX_BUFFERHEADERTYPE*& buffer );
+    bool AddAllocatedBufferToMap( OMX_U32 port, OMX_BUFFERHEADERTYPE* buffer );
 
 private:
     class DataClass;

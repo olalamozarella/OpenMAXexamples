@@ -25,7 +25,7 @@ bool Tunnel::SetupTunnel()
         return false;
     }
 
-    if ( sourceState != OMX_StateIdle ) {
+    if ( sourceState == OMX_StateLoaded ) {
         LOG_ERR( "Wrong component state" );
         return false;
     }
