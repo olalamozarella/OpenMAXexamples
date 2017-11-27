@@ -1,25 +1,24 @@
-#include "VideoDecodeRender.h"
+#include "MPEG2Stuff.h"
 
-#include <cstdio>
 #include <fstream>
 
 #include "src/core/CommonFunctions.h"
 #include "src/core/Logger.h"
 #include "src/core/Tunnel.h"
-#include "src/components/DecoderH264.h"
+#include "src/components/DecoderMPEG2.h"
 #include "src/components/VideoRenderer.h"
 
-#define FILENAME "test.h264"
+#define FILENAME "test.mpeg2"
 
 using namespace std;
 
-class VideoDecodeRender::DataClass
+class MPEG2Stuff::DataClass
 {
 public:
     DataClass();
     ~DataClass();
 
-    DecoderH264* decoder;
+    DecoderMPEG2* decoder;
     VideoRenderer* renderer;
 
     ifstream inputFile;
@@ -29,32 +28,71 @@ public:
     bool ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer );
 };
 
-VideoDecodeRender::DataClass::DataClass()
+MPEG2Stuff::DataClass::DataClass()
 {
     inputBuffersCreated = false;
     remainingFileSize = 0;
 }
 
-VideoDecodeRender::DataClass::~DataClass()
+MPEG2Stuff::DataClass::~DataClass()
 {
+
 }
 
-VideoDecodeRender::VideoDecodeRender()
-    : TestCase( TESTCASE_NAME_VIDEO_DECODE_RENDER )
+bool MPEG2Stuff::DataClass::ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer )
+{
+    if ( buffer == NULL ) {
+        LOG_ERR( "NULL buffer" );
+        return false;
+    }
+
+    if ( inputFile.is_open() == false ) {
+        LOG_ERR( "File is not open" );
+        return false;
+    }
+
+    if ( inputFile.good() == false ) {
+        LOG_ERR( "input file stream is not good" );
+        return false;
+    }
+
+    long bufferSize = buffer->nAllocLen;
+    //LOG_INFO( "Reading file, bytes to read: " + INT2STR( bufferSize ) );
+
+    inputFile.read( ( char* ) buffer->pBuffer, bufferSize );
+
+    if ( inputFile.good() == true ) {
+        //LOG_INFO( "File read successful" );
+    } else if ( inputFile.eof() == true ) {
+        LOG_WARN( "Found EOF" );
+        buffer->nFlags |= OMX_BUFFERFLAG_EOS;
+    } else {
+        LOG_ERR( "File read error" );
+    }
+
+    long readBytes = inputFile.gcount();
+    buffer->nFilledLen = readBytes;
+    //LOG_INFO( "Bytes read: " + INT2STR( readBytes ) );
+
+    return true;
+}
+
+MPEG2Stuff::MPEG2Stuff()
+    : TestCase( TESTCASE_NAME_MPEG2STUFF )
 {
     d = new DataClass();
-    d->decoder = new DecoderH264();
+    d->decoder = new DecoderMPEG2();
     d->renderer = new VideoRenderer();
 }
 
-VideoDecodeRender::~VideoDecodeRender()
+MPEG2Stuff::~MPEG2Stuff()
 {
     delete d->renderer;
     delete d->decoder;
     delete d;
 }
 
-void VideoDecodeRender::Init()
+void MPEG2Stuff::Init()
 {
     OMX_ERRORTYPE err = OMX_Init();
     if ( err != OMX_ErrorNone ) {
@@ -76,7 +114,7 @@ void VideoDecodeRender::Init()
     LOG_INFO( "File opened, size: " + INT2STR( d->remainingFileSize ) );
 }
 
-void VideoDecodeRender::Run()
+void MPEG2Stuff::Run()
 {
     TestCase::Run();
 
@@ -114,7 +152,7 @@ void VideoDecodeRender::Run()
         return;
     }
 
-    ok = d->decoder->EnablePortBuffers( DecoderH264::InputPort );
+    ok = d->decoder->EnablePortBuffers( DecoderMPEG2::InputPort );
     if ( ok == false ) {
         LOG_ERR( "Error enabling port buffers" );
         return;
@@ -131,13 +169,13 @@ void VideoDecodeRender::Run()
     bool portSettingChangedOccured = false;
     while ( portSettingChangedOccured == false ) {
         OMX_BUFFERHEADERTYPE* buffer;
-        ok = d->decoder->GetInputBuffer( DecoderH264::InputPort, buffer );
+        ok = d->decoder->GetInputBuffer( DecoderMPEG2::InputPort, buffer );
         if ( ( ok == false ) || ( buffer == NULL ) ) {
             LOG_ERR( "Error get input buffer" );
             break;
         }
 
-        ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer );
+        ok = d->ReadFileToBuffer( d->inputFile, buffer );
         if ( ok == false ) {
             LOG_ERR( "read file failed" );
             break;
@@ -149,10 +187,10 @@ void VideoDecodeRender::Run()
             break;
         }
 
-        portSettingChangedOccured = d->decoder->WaitForEvent( OMX_EventPortSettingsChanged, DecoderH264::OutputPort, 0, EVENT_HANDLER_NO_TIMEOUT );
+        portSettingChangedOccured = d->decoder->WaitForEvent( OMX_EventPortSettingsChanged, DecoderMPEG2::OutputPort, 0, EVENT_HANDLER_NO_TIMEOUT );
     }
 
-    Tunnel tunnelDecoderRenderer( d->decoder, DecoderH264::OutputPort, d->renderer, VideoRenderer::InputPort );
+    Tunnel tunnelDecoderRenderer( d->decoder, DecoderMPEG2::OutputPort, d->renderer, VideoRenderer::InputPort );
     ok = tunnelDecoderRenderer.SetupTunnel();
     if ( ok == false ) {
         LOG_ERR( "Error setup tunnel" );
@@ -165,7 +203,7 @@ void VideoDecodeRender::Run()
         return;
     }
 
-    ok = d->decoder->EnablePort( DecoderH264::OutputPort );
+    ok = d->decoder->EnablePort( DecoderMPEG2::OutputPort );
     if ( ok == false ) {
         LOG_ERR( "Error enabling decoder output port" );
         return;
@@ -177,12 +215,6 @@ void VideoDecodeRender::Run()
         return;
     }
 
-    ok = d->renderer->WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortEnable, VideoRenderer::InputPort, EVENT_HANDLER_TIMEOUT_MS_MAX );
-    if ( ok == false ) {
-        LOG_ERR( "Error enabling renderer input port - event did not come during timeout" );
-        return;
-    }
-
     ok = d->renderer->ChangeState( OMX_StateExecuting );
     if ( ok == false ) {
         LOG_ERR( "Error changing state to executing" );
@@ -191,16 +223,16 @@ void VideoDecodeRender::Run()
 
     while ( true ) {
         OMX_BUFFERHEADERTYPE* buffer;
-        ok = d->decoder->GetInputBuffer( DecoderH264::InputPort, buffer );
+        ok = d->decoder->GetInputBuffer( DecoderMPEG2::InputPort, buffer );
         if ( ( ok == false ) || ( buffer == NULL ) ) {
             LOG_ERR( "Error get input buffer" );
             break;
         }
 
-        ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer );
+        ok = d->ReadFileToBuffer( d->inputFile, buffer );
         if ( ok == false ) {
             LOG_ERR( "read file failed - adding buffer back to map" );
-            ok = d->decoder->AddAllocatedBufferToMap( DecoderH264::InputPort, buffer );
+            ok = d->decoder->AddAllocatedBufferToMap( DecoderMPEG2::InputPort, buffer );
             if ( ok == false ) {
                 LOG_ERR( "Cannot add allocated buffer to map manually" );
             }
@@ -217,7 +249,7 @@ void VideoDecodeRender::Run()
     int availableCount = 0;
     int allocatedCount = 0;
     while ( true ) {
-        ok = d->decoder->GetBufferCount( DecoderH264::InputPort, availableCount, allocatedCount );
+        ok = d->decoder->GetBufferCount( DecoderMPEG2::InputPort, availableCount, allocatedCount );
         if ( ok == false ) {
             LOG_ERR( "Error measuring buffer count" );
         }
@@ -234,22 +266,10 @@ void VideoDecodeRender::Run()
         }
     }
 
-    ok = d->decoder->ChangeState( OMX_StateIdle );
-    if ( ok == false ) {
-        LOG_ERR( "Error changing decoder state to idle" );
-        return;
-    }
-
-    ok = d->renderer->ChangeState( OMX_StateIdle );
-    if ( ok == false ) {
-        LOG_ERR( "Error changing renderer state to idle" );
-        return;
-    }
-
     LOG_INFO( "Finished run" );
 }
 
-void VideoDecodeRender::Destroy()
+void MPEG2Stuff::Destroy()
 {
     if ( d->inputFile.is_open() == true ) {
         d->inputFile.close();
@@ -257,7 +277,7 @@ void VideoDecodeRender::Destroy()
     }
 
     if ( d->inputBuffersCreated == true ) {
-        bool ok = d->decoder->DisablePortBuffers( DecoderH264::InputPort );
+        bool ok = d->decoder->DisablePortBuffers( DecoderMPEG2::InputPort );
         if ( ok == false ) {
             LOG_ERR( "DisablePortBuffers failed" );
         } else {

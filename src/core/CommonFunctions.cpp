@@ -3,8 +3,10 @@
 #include <iostream>
 #include <cstring>
 #include <sstream>
+#include <fstream>
 
 #include "IL/OMX_Component.h"
+#include "src/core/Logger.h"
 
 using namespace std;
 
@@ -114,6 +116,53 @@ string CommonFunctions::StateToString( OMX_STATETYPE state )
     }
 }
 
+string CommonFunctions::EventTypeToString( OMX_EVENTTYPE eventType, OMX_U32 data1 )
+{
+    switch ( eventType ) {
+        case OMX_EventCmdComplete:
+            switch ( data1 ) {
+                case OMX_CommandStateSet:
+                    return "OMX_CommandStateSet - OMX_CommandStateSet";
+                case OMX_CommandPortDisable:
+                    return "OMX_CommandStateSet - OMX_CommandPortDisable";
+                case OMX_CommandPortEnable:
+                    return "OMX_CommandStateSet - OMX_CommandPortEnable";
+                case OMX_CommandFlush:
+                    return "OMX_CommandStateSet - OMX_CommandFlush";
+                case OMX_CommandMarkBuffer:
+                    return "OMX_CommandStateSet - OMX_CommandMarkBuffer";
+                default:
+                    return "OMX_CommandStateSet - unknown command";
+            }
+        case OMX_EventError:
+            return "OMX_EventError";
+        case OMX_EventMark:
+            return "OMX_EventMark";
+        case OMX_EventPortSettingsChanged:
+            return "OMX_EventPortSettingsChanged";
+        case OMX_EventBufferFlag:
+            return "OMX_EventBufferFlag";
+        case OMX_EventResourcesAcquired:
+            return "OMX_EventResourcesAcquired";
+        case OMX_EventComponentResumed:
+            return "OMX_EventComponentResumed";
+        case OMX_EventDynamicResourcesAvailable:
+            return "OMX_EventDynamicResourcesAvailable";
+        case OMX_EventPortFormatDetected:
+            return "OMX_EventPortFormatDetected";
+        case OMX_EventKhronosExtensions:
+            return "OMX_EventKhronosExtensions";
+        case OMX_EventVendorStartUnused:
+            return "OMX_EventVendorStartUnused";
+        case OMX_EventParamOrConfigChanged:
+            return "OMX_EventParamOrConfigChanged";
+        case OMX_EventMax:
+            return "OMX_EventMax";
+        default:
+            return "Unknown event type";
+    }
+}
+
 std::string CommonFunctions::GetComponentState( OMX_HANDLETYPE handle )
 {
     OMX_STATETYPE state;
@@ -183,6 +232,18 @@ void CommonFunctions::InitStructure( OMX_PORT_PARAM_TYPE& structure )
     structure.nVersion.s.nStep = OMX_VERSION_STEP;
 }
 
+void CommonFunctions::InitStructure( OMX_PARAM_PORTDEFINITIONTYPE& structure )
+{
+    memset( &structure, 0, sizeof( OMX_PARAM_PORTDEFINITIONTYPE ) );
+    structure.nSize = sizeof( OMX_PARAM_PORTDEFINITIONTYPE );
+    structure.nVersion.nVersion = OMX_VERSION;
+    structure.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
+    structure.nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
+    structure.nVersion.s.nRevision = OMX_VERSION_REVISION;
+    structure.nVersion.s.nStep = OMX_VERSION_STEP;
+}
+
+
 void CommonFunctions::InitStructure( OMX_VIDEO_PARAM_PORTFORMATTYPE& structure )
 {
     memset( &structure, 0, sizeof( OMX_VIDEO_PARAM_PORTFORMATTYPE ) );
@@ -194,10 +255,10 @@ void CommonFunctions::InitStructure( OMX_VIDEO_PARAM_PORTFORMATTYPE& structure )
     structure.nVersion.s.nStep = OMX_VERSION_STEP;
 }
 
-void CommonFunctions::InitStructure( OMX_PARAM_PORTDEFINITIONTYPE& structure )
+void CommonFunctions::InitStructure( OMX_IMAGE_PARAM_PORTFORMATTYPE& structure )
 {
-    memset( &structure, 0, sizeof( OMX_PARAM_PORTDEFINITIONTYPE ) );
-    structure.nSize = sizeof( OMX_PARAM_PORTDEFINITIONTYPE );
+    memset( &structure, 0, sizeof( OMX_IMAGE_PARAM_PORTFORMATTYPE ) );
+    structure.nSize = sizeof( OMX_IMAGE_PARAM_PORTFORMATTYPE );
     structure.nVersion.nVersion = OMX_VERSION;
     structure.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
     structure.nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
@@ -210,4 +271,42 @@ string CommonFunctions::IntToString( int a )
     stringstream s;
     s << a;
     return s.str();
+}
+
+bool CommonFunctions::ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer )
+{
+    if ( buffer == NULL ) {
+        LOG_ERR( "NULL buffer" );
+        return false;
+    }
+
+    if ( inputFile.is_open() == false ) {
+        LOG_ERR( "File is not open" );
+        return false;
+    }
+
+    if ( inputFile.good() == false ) {
+        LOG_ERR( "input file stream is not good" );
+        return false;
+    }
+
+    long bufferSize = buffer->nAllocLen;
+    //LOG_INFO( "Reading file, bytes to read: " + INT2STR( bufferSize ) );
+
+    inputFile.read( ( char* ) buffer->pBuffer, bufferSize );
+
+    if ( inputFile.good() == true ) {
+        //LOG_INFO( "File read successful" );
+    } else if ( inputFile.eof() == true ) {
+        LOG_WARN( "Found EOF" );
+        buffer->nFlags |= OMX_BUFFERFLAG_EOS;
+    } else {
+        LOG_ERR( "File read error" );
+    }
+
+    long readBytes = inputFile.gcount();
+    buffer->nFilledLen = readBytes;
+    //LOG_INFO( "Bytes read: " + INT2STR( readBytes ) );
+
+    return true;
 }

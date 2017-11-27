@@ -10,6 +10,8 @@
 #include "src/testcases/NoBuffers.h"
 #include "src/testcases/BuffersNoIL.h"
 #include "src/testcases/VideoDecodeRender.h"
+#include "src/testcases/MPEG2Stuff.h"
+#include "src/testcases/ImageDecodeRender.h"
 
 using namespace std;
 
@@ -34,12 +36,24 @@ int main()
 //    buffersNoIL.Run();
 //    buffersNoIL.Destroy();
 
-    VideoDecodeRender testcase;
+//    VideoDecodeRender testcase;
+//    testcase.Init();
+//    testcase.Run();
+//    testcase.Destroy();
+
+//    MPEG2Stuff testcase;
+//    testcase.Init();
+//    testcase.Run();
+//    testcase.Destroy();
+
+    ImageDecodeRender testcase;
     testcase.Init();
     testcase.Run();
     testcase.Destroy();
 
     bcm_host_deinit();
+
+    sleep( 10 );
 
     return 0;
 }

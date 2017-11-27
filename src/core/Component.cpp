@@ -337,7 +337,11 @@ bool Component::DisablePortBuffers( const OMX_U32 port )
     }
     buffers.clear();
 
-    WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortDisable, port, EVENT_HANDLER_TIMEOUT_MS_DEFAULT );
+    ok = WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortDisable, port, 100 );
+    if ( ok == false ) {
+        LOG_ERR( "Disable port event has not arrived" );
+        return false;
+    }
 
     return true;
 }
@@ -443,16 +447,16 @@ OMX_ERRORTYPE Component::eventHandler( OMX_EVENTTYPE eventType, OMX_U32 data1, O
             }
             break;
         case OMX_EventError:
-            LOG_INFO( GetComponentName() + ":Event handler - error" );
+            LOG_ERR( GetComponentName() + ":Event handler - error; data1: " + INT2STR( data1 ) + ", data2: " + INT2STR( data2 )  );
             break;
         case OMX_EventMark:
             LOG_INFO( GetComponentName() + ":Event handler - mark" );
             break;
         case OMX_EventPortSettingsChanged:
-            LOG_ERR( GetComponentName() + ":Event handler - port settings changed" );
+            LOG_WARN( GetComponentName() + ":Event handler - port settings changed" );
             break;
         case OMX_EventParamOrConfigChanged:
-            LOG_INFO( GetComponentName() + ":Event handler - param or config changed" );
+            LOG_WARN( GetComponentName() + ":Event handler - param or config changed" );
             break;
         case OMX_EventBufferFlag:
             LOG_INFO( GetComponentName() + ":Event handler - buffer flag" );
@@ -532,7 +536,7 @@ OMX_ERRORTYPE Component::emptyBufferDone( OMX_BUFFERHEADERTYPE* bufferHeader )
 
 bool Component::WaitForEvent( OMX_EVENTTYPE eventType, OMX_U32 data1, OMX_U32 data2, int msTimeout )
 {
-    LOG_INFO( GetComponentName() + ":Waiting for event" );
+    LOG_INFO( GetComponentName() + ":Waiting for event - " + CommonFunctions::EventTypeToString( eventType, data1 ) );
 
     bool foundMatch = false;
     while ( foundMatch == false ) {

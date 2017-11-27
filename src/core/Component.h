@@ -2,6 +2,7 @@
 #define COMPONENT_H
 
 #include <string>
+
 #include "IL/OMX_Component.h"
 
 class Component

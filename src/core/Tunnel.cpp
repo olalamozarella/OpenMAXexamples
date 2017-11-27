@@ -36,5 +36,6 @@ bool Tunnel::SetupTunnel()
         return false;
     }
 
+    LOG_INFO( "Tunnel setup successful" );
     return true;
 }
