@@ -125,13 +125,14 @@ void ImageDecodeRender::Run()
     }
 
     OMX_BUFFERHEADERTYPE* buffer;
-    ok = d->decoder->GetInputBuffer( DecoderJPEG::InputPort, buffer );
+    ok = d->decoder->WaitForInputBuffer( DecoderJPEG::InputPort, buffer );
     if ( ( ok == false ) || ( buffer == NULL ) ) {
         LOG_ERR( "Error get input buffer" );
         return;
     }
 
-    ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer );
+    bool foundEOF = false;
+    ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer, foundEOF );
     if ( ok == false ) {
         LOG_ERR( "read file failed" );
         return;
@@ -150,34 +151,34 @@ void ImageDecodeRender::Run()
         return;
     }
 
+//    ok = d->decoder->EnablePort( DecoderJPEG::OutputPort );
+//    if ( ok == false ) {
+//        LOG_ERR( "Error enabling decoder output port" );
+//        return;
+//    }
+
+//    ok = d->decoder->WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortEnable, DecoderJPEG::OutputPort, EVENT_HANDLER_TIMEOUT_MS_MAX );
+//    if ( ok == false ) {
+//        LOG_ERR( "Error enabling decoder output port - event did not come during timeout" );
+//        return;
+//    }
+
+//    ok = d->renderer->EnablePort( VideoRenderer::InputPort );
+//    if ( ok == false ) {
+//        LOG_ERR( "Error enabling renderer input port" );
+//        return;
+//    }
+
+//    ok = d->renderer->WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortEnable, VideoRenderer::InputPort, EVENT_HANDLER_TIMEOUT_MS_MAX );
+//    if ( ok == false ) {
+//        LOG_ERR( "Error enabling renderer input port - event did not come during timeout" );
+//        return;
+//    }
+
     Tunnel tunnelDecoderRenderer( d->decoder, DecoderJPEG::OutputPort, d->renderer, VideoRenderer::InputPort );
     ok = tunnelDecoderRenderer.SetupTunnel();
     if ( ok == false ) {
         LOG_ERR( "Error setup tunnel" );
-        return;
-    }
-
-    ok = d->renderer->EnablePort( VideoRenderer::InputPort );
-    if ( ok == false ) {
-        LOG_ERR( "Error enabling renderer input port" );
-        return;
-    }
-
-    ok = d->renderer->WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortEnable, VideoRenderer::InputPort, EVENT_HANDLER_TIMEOUT_MS_MAX );
-    if ( ok == false ) {
-        LOG_ERR( "Error enabling renderer input port - event did not come during timeout" );
-        return;
-    }
-/*
-    ok = d->decoder->EnablePort( DecoderJPEG::OutputPort );
-    if ( ok == false ) {
-        LOG_ERR( "Error enabling decoder output port" );
-        return;
-    }
-
-    ok = d->decoder->WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortEnable, DecoderJPEG::OutputPort, EVENT_HANDLER_TIMEOUT_MS_DEFAULT );
-    if ( ok == false ) {
-        LOG_ERR( "Error enabling decoder output port - event did not come during timeout" );
         return;
     }
 
@@ -189,13 +190,13 @@ void ImageDecodeRender::Run()
 
     while ( true ) {
         OMX_BUFFERHEADERTYPE* buffer;
-        ok = d->decoder->GetInputBuffer( DecoderJPEG::InputPort, buffer );
+        ok = d->decoder->WaitForInputBuffer( DecoderJPEG::InputPort, buffer );
         if ( ( ok == false ) || ( buffer == NULL ) ) {
             LOG_ERR( "Error get input buffer" );
             break;
         }
 
-        ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer );
+        ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer, foundEOF );
         if ( ok == false ) {
             LOG_ERR( "read file failed - adding buffer back to map" );
             ok = d->decoder->AddAllocatedBufferToMap( DecoderJPEG::InputPort, buffer );
@@ -225,12 +226,12 @@ void ImageDecodeRender::Run()
             break;
         } else {
             LOG_WARN( "Not all buffers are available: allocated=" + INT2STR( allocatedCount ) + " available:" + INT2STR( availableCount ) );
-            ok = d->decoder->WaitForEmptyBufferDone( 100 );
+            ok = d->decoder->WaitForBufferEvent( DecoderJPEG::InputPort, 100 );
             if ( ok == false ) {
                 LOG_ERR( "Not all buffers are available - timeout occured" );
             }
         }
-    }*/
+    }
 
     LOG_INFO( "Finished run" );
 }

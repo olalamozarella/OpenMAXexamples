@@ -8,6 +8,7 @@
 #include "src/core/Tunnel.h"
 #include "src/components/DecoderH264.h"
 #include "src/components/VideoRenderer.h"
+#include "src/threadworkers/FileReader.h"
 
 #define FILENAME "test.h264"
 
@@ -25,8 +26,6 @@ public:
     ifstream inputFile;
     long remainingFileSize;
     bool inputBuffersCreated;
-
-    bool ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer );
 };
 
 VideoDecodeRender::DataClass::DataClass()
@@ -129,15 +128,16 @@ void VideoDecodeRender::Run()
 
     //feed some data
     bool portSettingChangedOccured = false;
+    bool foundEOF = false;
     while ( portSettingChangedOccured == false ) {
         OMX_BUFFERHEADERTYPE* buffer;
-        ok = d->decoder->GetInputBuffer( DecoderH264::InputPort, buffer );
+        ok = d->decoder->WaitForInputBuffer( DecoderH264::InputPort, buffer );
         if ( ( ok == false ) || ( buffer == NULL ) ) {
             LOG_ERR( "Error get input buffer" );
             break;
         }
 
-        ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer );
+        ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer, foundEOF );
         if ( ok == false ) {
             LOG_ERR( "read file failed" );
             break;
@@ -189,50 +189,9 @@ void VideoDecodeRender::Run()
         return;
     }
 
-    while ( true ) {
-        OMX_BUFFERHEADERTYPE* buffer;
-        ok = d->decoder->GetInputBuffer( DecoderH264::InputPort, buffer );
-        if ( ( ok == false ) || ( buffer == NULL ) ) {
-            LOG_ERR( "Error get input buffer" );
-            break;
-        }
-
-        ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer );
-        if ( ok == false ) {
-            LOG_ERR( "read file failed - adding buffer back to map" );
-            ok = d->decoder->AddAllocatedBufferToMap( DecoderH264::InputPort, buffer );
-            if ( ok == false ) {
-                LOG_ERR( "Cannot add allocated buffer to map manually" );
-            }
-            break;
-        }
-
-        ok = d->decoder->EmptyThisBuffer( buffer );
-        if ( ok == false ) {
-            LOG_ERR( "empty first buffer failed" );
-            break;
-        }
-    }
-
-    int availableCount = 0;
-    int allocatedCount = 0;
-    while ( true ) {
-        ok = d->decoder->GetBufferCount( DecoderH264::InputPort, availableCount, allocatedCount );
-        if ( ok == false ) {
-            LOG_ERR( "Error measuring buffer count" );
-        }
-
-        if ( availableCount == allocatedCount ) {
-            LOG_INFO( "All buffers are available" );
-            break;
-        } else {
-            LOG_WARN( "Not all buffers are available: allocated=" + INT2STR( allocatedCount ) + " available:" + INT2STR( availableCount ) );
-            ok = d->decoder->WaitForEmptyBufferDone( 100 );
-            if ( ok == false ) {
-                LOG_ERR( "Not all buffers are available - timeout occured" );
-            }
-        }
-    }
+    FileReader fileReader( d->decoder, &d->inputFile, d->decoder->InputPort );
+    fileReader.Start();
+    fileReader.WaitForThreadJoin();
 
     ok = d->decoder->ChangeState( OMX_StateIdle );
     if ( ok == false ) {

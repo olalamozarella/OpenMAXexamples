@@ -21,9 +21,10 @@ public:
     DataClass( Component* owner );
     ~DataClass();
 
-    Component* dataclassOwner;
-
     OMX_ERRORTYPE DisableAllPorts();
+    EventLocker* GetPortBufferLocker( const OMX_U32 port );
+
+    Component* dataclassOwner;
 
     OMX_HANDLETYPE componentHandle;
     OMX_STRING componentName;
@@ -32,10 +33,10 @@ public:
     list<EmptyBufferDone> emptyBufferDoneList;
     list<FillBufferDone> fillBufferDoneList;
 
-    map<OMX_U32, list<OMX_BUFFERHEADERTYPE*> > buffers;
+    map<OMX_U32, list<OMX_BUFFERHEADERTYPE*> > emptyBuffers;
 
     EventLocker eventLocker;
-    EventLocker bufferLocker;
+    map<OMX_U32, EventLocker*> portBufferLockers;
 };
 
 Component::DataClass::DataClass( Component* owner )
@@ -77,6 +78,19 @@ OMX_ERRORTYPE Component::DataClass::DisableAllPorts()
     return err;
 }
 
+EventLocker* Component::DataClass::GetPortBufferLocker( const OMX_U32 port )
+{
+    EventLocker* portBufferLocker = NULL;
+    if ( portBufferLockers.find( port ) == portBufferLockers.end() ) {
+        portBufferLocker = new EventLocker();
+        portBufferLockers[ port ] = portBufferLocker;
+    } else {
+        portBufferLocker = portBufferLockers[port];
+    }
+
+    return portBufferLocker;
+}
+
 Component::Component( const string& name )
 {
     d = new DataClass( this );
@@ -104,18 +118,6 @@ string Component::GetComponentName()
 
 bool Component::Init()
 {
-    bool ok = d->eventLocker.Init();
-    if ( ok == false ) {
-        LOG_ERR( GetComponentName() + ":Error init eventLocker" );
-        return false;
-    }
-
-    ok = d->bufferLocker.Init();
-    if ( ok == false ) {
-        LOG_ERR( GetComponentName() + ":Error init bufferLocker" );
-        return false;
-    }
-
     OMX_CALLBACKTYPE callbacks;
     callbacks.EmptyBufferDone = EmptyBufferDoneCallback;
     callbacks.FillBufferDone = FillBufferDoneCallback;
@@ -138,15 +140,19 @@ bool Component::Init()
 
 bool Component::DeInit()
 {
-    bool ok = d->eventLocker.Deinit();
+    bool ok = false;
+    for ( map<OMX_U32, EventLocker*>::iterator iter = d->portBufferLockers.begin(); iter != d->portBufferLockers.end(); iter++ ) {
+        ok = iter->second->Deinit();
+        if ( ok == false ) {
+            LOG_ERR( GetComponentName() + ":Error deinit port buffer locker for port " + INT2STR( iter->first ) );
+        }
+        delete iter->second;
+    }
+    d->portBufferLockers.clear();
+
+    ok = d->eventLocker.Deinit();
     if ( ok == false ) {
         LOG_ERR( GetComponentName() + ":Error deinit eventLocker" );
-        return false;
-    }
-
-    ok = d->bufferLocker.Deinit();
-    if ( ok == false ) {
-        LOG_ERR( GetComponentName() + ":Error deinit bufferLocker" );
         return false;
     }
 
@@ -235,6 +241,8 @@ bool Component::DisablePort( const OMX_U32 port )
 
 bool Component::EnablePortBuffers( const OMX_U32 port )
 {
+    EventLocker* portBufferLocker = d->GetPortBufferLocker( port );
+
     OMX_PARAM_PORTDEFINITIONTYPE portdef;
     CommonFunctions::InitStructure( portdef );
     portdef.nPortIndex = port;
@@ -258,13 +266,13 @@ bool Component::EnablePortBuffers( const OMX_U32 port )
         return false;
     }
 
-    d->bufferLocker.Lock();
+    portBufferLocker->Lock();
 
     // port will be enabled after all buffers have been allocated
     ok = EnablePort( port );
     if ( ok == false ) {
         LOG_ERR( GetComponentName() + ":Error enabling port" );
-        d->bufferLocker.Unlock();
+        portBufferLocker->Unlock();
         return false;
     }
 
@@ -274,7 +282,7 @@ bool Component::EnablePortBuffers( const OMX_U32 port )
         int result = posix_memalign( ( void** )&buffer, portdef.nBufferAlignment, portdef.nBufferSize );
         if ( result != 0 ) {
             LOG_ERR( GetComponentName() + ":Error allocating posix-aligned memory" );
-            d->bufferLocker.Unlock();
+            portBufferLocker->Unlock();
             return false;
         }
 
@@ -282,18 +290,18 @@ bool Component::EnablePortBuffers( const OMX_U32 port )
         ok = UseBuffer( bufferHeader, port, portdef.nBufferSize, buffer );
         if ( ok == false ) {
             LOG_ERR( GetComponentName() + ":Error using allocated buffer" );
-            d->bufferLocker.Unlock();
+            portBufferLocker->Unlock();
             return false;
         }
     }
 
-    if ( ( OMX_U32 )d->buffers[port].size() != portdef.nBufferCountActual ) {
-        LOG_ERR( GetComponentName() + ":Allocated buffer count differs from port definition! Buffer count: " + INT2STR( d->buffers[port].size() ) + " Portdef: " + INT2STR( portdef.nBufferCountActual ) );
-        d->bufferLocker.Unlock();
+    if ( ( OMX_U32 )d->emptyBuffers[port].size() != portdef.nBufferCountActual ) {
+        LOG_ERR( GetComponentName() + ":Allocated buffer count differs from port definition! Buffer count: " + INT2STR( d->emptyBuffers[port].size() ) + " Portdef: " + INT2STR( portdef.nBufferCountActual ) );
+        portBufferLocker->Unlock();
         return false;
     }
 
-    d->bufferLocker.Unlock();
+    portBufferLocker->Unlock();
 
     WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortEnable, port, EVENT_HANDLER_TIMEOUT_MS_DEFAULT );
 
@@ -315,8 +323,8 @@ bool Component::DisablePortBuffers( const OMX_U32 port )
         return false;
     }
 
-    if ( ( OMX_U32 )d->buffers[port].size() != portdef.nBufferCountActual ) {
-        LOG_ERR( GetComponentName() + ":Allocated buffer count differs from port definition! Buffer count: " + INT2STR( d->buffers[port].size() ) + " Portdef: " + INT2STR( portdef.nBufferCountActual ) );
+    if ( ( OMX_U32 )d->emptyBuffers[port].size() != portdef.nBufferCountActual ) {
+        LOG_ERR( GetComponentName() + ":Allocated buffer count differs from port definition! Buffer count: " + INT2STR( d->emptyBuffers[port].size() ) + " Portdef: " + INT2STR( portdef.nBufferCountActual ) );
         return false;
     }
 
@@ -325,7 +333,7 @@ bool Component::DisablePortBuffers( const OMX_U32 port )
         return false;
     }
 
-    list<OMX_BUFFERHEADERTYPE*> buffers = d->buffers[port];
+    list<OMX_BUFFERHEADERTYPE*> buffers = d->emptyBuffers[port];
     for ( list<OMX_BUFFERHEADERTYPE*>::iterator iter = buffers.begin(); iter != buffers.end(); iter++  ) {
         OMX_ERRORTYPE err = OMX_FreeBuffer( d->componentHandle, port, ( *iter ) );
         if ( err != OMX_ErrorNone ) {
@@ -357,7 +365,7 @@ bool Component::GetBufferCount( const OMX_U32 port, int& actualCount, int& alloc
     }
 
     allocatedCount = portdef.nBufferCountActual;
-    actualCount = d->buffers[port].size();
+    actualCount = d->emptyBuffers[port].size();
     return true;
 }
 
@@ -370,7 +378,7 @@ bool Component::UseBuffer( OMX_BUFFERHEADERTYPE* bufferHeader, OMX_U32 portIndex
         return false;
     }
 
-    d->buffers[portIndex].push_back( bufferHeader );
+    d->emptyBuffers[portIndex].push_back( bufferHeader );
 
     return true;
 }
@@ -383,6 +391,22 @@ bool Component::EmptyThisBuffer( OMX_BUFFERHEADERTYPE* buffer )
     }
 
     OMX_ERRORTYPE err = OMX_EmptyThisBuffer( d->componentHandle, buffer );
+    if ( err != OMX_ErrorNone ) {
+        LOG_ERR( GetComponentName() + ":Error during OMX_EmptyThisBuffer: " + CommonFunctions::ErrorToString( err ) );
+        return false;
+    }
+
+    return true;
+}
+
+bool Component::FillThisBuffer( OMX_BUFFERHEADERTYPE* buffer )
+{
+    if ( buffer == NULL ) {
+        LOG_ERR( GetComponentName() + ":Null pointer" );
+        return false;
+    }
+
+    OMX_ERRORTYPE err = OMX_FillThisBuffer( d->componentHandle, buffer );
     if ( err != OMX_ErrorNone ) {
         LOG_ERR( GetComponentName() + ":Error during OMX_EmptyThisBuffer: " + CommonFunctions::ErrorToString( err ) );
         return false;
@@ -501,9 +525,29 @@ OMX_ERRORTYPE Component::eventHandler( OMX_EVENTTYPE eventType, OMX_U32 data1, O
 
 OMX_ERRORTYPE Component::fillBufferDone( OMX_BUFFERHEADERTYPE* bufferHeader )
 {
+    LOG_INFO( GetComponentName() + ":FillBufferDone event occured" );
+
     FillBufferDone event;
     event.buffer = bufferHeader;
+    OMX_U32 port = bufferHeader->nOutputPortIndex;
+
+    EventLocker* portBufferLocker = d->GetPortBufferLocker( port );
+    portBufferLocker->Lock();
+
+    LOG_INFO( GetComponentName() + ":adding buffer to buffer list" );
+
+    //buffer is filled - callback should just notify app
+    //d->buffers[port].push_back( bufferHeader );
+
+    LOG_INFO( GetComponentName() + ":buffer added to buffer list" );
+
+    portBufferLocker->Unlock();
+
+    //store event in list, so that other thread could access filled buffer
     d->fillBufferDoneList.push_back( event );
+
+    //notify others that buffer is available
+    portBufferLocker->BroadcastEvent();
 
     return OMX_ErrorNone;
 }
@@ -516,25 +560,26 @@ OMX_ERRORTYPE Component::emptyBufferDone( OMX_BUFFERHEADERTYPE* bufferHeader )
     event.buffer = bufferHeader;
     OMX_U32 port = bufferHeader->nInputPortIndex;
 
-    d->bufferLocker.Lock();
+    EventLocker* portBufferLocker = d->GetPortBufferLocker( port );
+    portBufferLocker->Lock();
     LOG_INFO( GetComponentName() + ":adding buffer to buffer list" );
 
     //add buffer header to buffer map
-    d->buffers[port].push_back( bufferHeader );
+    d->emptyBuffers[port].push_back( bufferHeader );
 
-    //add event to event list
-    d->emptyBufferDoneList.push_back( event );
+    // I do not need to store emptyBufferDone events yet - nobody accesses those events for later use
+    //d->emptyBufferDoneList.push_back( event );
 
     LOG_INFO( GetComponentName() + ":buffer added to buffer list" );
-    d->bufferLocker.Unlock();
+    portBufferLocker->Unlock();
 
     //notify others that buffer is available
-    d->bufferLocker.BroadcastEvent();
+    portBufferLocker->BroadcastEvent();
 
     return OMX_ErrorNone;
 }
 
-bool Component::WaitForEvent( OMX_EVENTTYPE eventType, OMX_U32 data1, OMX_U32 data2, int msTimeout )
+bool Component::WaitForEvent( const OMX_EVENTTYPE eventType, const OMX_U32 data1, const OMX_U32 data2, const int msTimeout )
 {
     LOG_INFO( GetComponentName() + ":Waiting for event - " + CommonFunctions::EventTypeToString( eventType, data1 ) );
 
@@ -576,53 +621,83 @@ bool Component::WaitForEvent( OMX_EVENTTYPE eventType, OMX_U32 data1, OMX_U32 da
     return true;
 }
 
-bool Component::WaitForEmptyBufferDone( int msTimeout )
+bool Component::WaitForBufferEvent( const OMX_U32 port, const int msTimeout )
 {
-    return d->bufferLocker.WaitForEvent( msTimeout );
+    EventLocker* portBufferLocker = d->GetPortBufferLocker( port );
+    return portBufferLocker->WaitForEvent( msTimeout );
 }
 
-bool Component::GetInputBuffer( OMX_U32 port, OMX_BUFFERHEADERTYPE*& buffer )
+bool Component::RemoveBufferFromCollection( const OMX_U32 port, const OMX_BUFFERHEADERTYPE* buffer )
 {
-    d->bufferLocker.Lock();
-    if ( d->buffers.find( port ) == d->buffers.end() ) {
-        LOG_ERR( GetComponentName() + ":Buffer for this port does not exist" );
-        d->bufferLocker.Unlock();
+    EventLocker* portBufferLocker = d->GetPortBufferLocker( port );
+    portBufferLocker->Lock();
+    if ( d->emptyBuffers.find( port ) == d->emptyBuffers.end() ) {
+        LOG_ERR( GetComponentName() + ":Buffer list for this port does not exist" );
+        portBufferLocker->Unlock();
         return false;
     }
 
-    list<OMX_BUFFERHEADERTYPE*>& bufferList = d->buffers[ port ];
+    list<OMX_BUFFERHEADERTYPE*>& bufferList = d->emptyBuffers[ port ];
+    for ( list<OMX_BUFFERHEADERTYPE*>::iterator iter = bufferList.begin(); iter != bufferList.end(); iter++ )
+    {
+        if ( *iter == buffer )
+        {
+            LOG_INFO( GetComponentName() + ":Buffer erased from list" );
+            bufferList.erase( iter );
+            portBufferLocker->Unlock();
+            return true;
+        }
+    }
+
+    LOG_ERR( GetComponentName() + ":Cannot erase buffer from list - buffer is not in list" );
+    portBufferLocker->Unlock();
+    return false;
+}
+
+bool Component::WaitForInputBuffer( const OMX_U32 port, OMX_BUFFERHEADERTYPE*& buffer )
+{
+    EventLocker* portBufferLocker = d->GetPortBufferLocker( port );
+    portBufferLocker->Lock();
+    if ( d->emptyBuffers.find( port ) == d->emptyBuffers.end() ) {
+        LOG_ERR( GetComponentName() + ":Buffer list for this port does not exist" );
+        portBufferLocker->Unlock();
+        return false;
+    }
+
+    list<OMX_BUFFERHEADERTYPE*>& bufferList = d->emptyBuffers[ port ];
     if ( bufferList.size() == 0 ) {
         LOG_INFO( "No available buffer - waiting for available buffer" );
-        d->bufferLocker.Unlock();
-        bool ok = d->bufferLocker.WaitForEvent( EVENT_HANDLER_TIMEOUT_MS_MAX );
+        portBufferLocker->Unlock();
+        bool ok = portBufferLocker->WaitForEvent( EVENT_HANDLER_TIMEOUT_MS_MAX );
         if ( ok == false ) {
             LOG_ERR( "No available buffer after timeout passed" );
             return false;
         }
-        d->bufferLocker.Lock();
+        portBufferLocker->Lock();
         LOG_INFO( GetComponentName() + ":Wakeup - new available buffer" );
     }
 
     buffer = bufferList.front();
     bufferList.pop_front();
-    d->bufferLocker.Unlock();
+    portBufferLocker->Unlock();
     return true;
 }
 
-bool Component::AddAllocatedBufferToMap( OMX_U32 port, OMX_BUFFERHEADERTYPE* buffer )
+bool Component::AddAllocatedBufferToMap( const OMX_U32 port, OMX_BUFFERHEADERTYPE* buffer )
 {
-    d->bufferLocker.Lock();
+    EventLocker* portBufferLocker = d->GetPortBufferLocker( port );
+    portBufferLocker->Lock();
 
-    if ( d->buffers.find( port ) == d->buffers.end() ) {
+    if ( d->emptyBuffers.find( port ) == d->emptyBuffers.end() ) {
         LOG_ERR( GetComponentName() + ": Buffer list for this port does not exist" );
-        d->bufferLocker.Unlock();
+        portBufferLocker->Unlock();
         return false;
     }
 
-    list<OMX_BUFFERHEADERTYPE*>& bufferList = d->buffers[ port ];
+    list<OMX_BUFFERHEADERTYPE*>& bufferList = d->emptyBuffers[ port ];
     bufferList.push_front( buffer );
 
-    d->bufferLocker.Unlock();
+    portBufferLocker->Unlock();
 
     return true;
 }

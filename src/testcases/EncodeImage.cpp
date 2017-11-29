@@ -1,6 +1,6 @@
 #include "EncodeImage.h"
 
-#include "src/core/Component.h"
+#include "src/components/EncoderJPEG.h"
 
 class EncodeImage::DataClass
 {
@@ -8,12 +8,12 @@ public:
     DataClass();
     ~DataClass();
 
-    Component* encoderComponent;
+    EncoderJPEG* encoderComponent;
 };
 
 EncodeImage::DataClass::DataClass()
 {
-    encoderComponent = new Component( "OMX.broadcom.image_encode" );
+    encoderComponent = new EncoderJPEG();
 }
 
 EncodeImage::DataClass::~DataClass()

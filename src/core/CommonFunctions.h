@@ -24,7 +24,8 @@ public:
 
     static std::string IntToString( int a );
 
-    static bool ReadFileToBuffer( std::ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer );
+    static bool ReadFileToBuffer( std::ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer, bool& foundEOF );
+    static bool WriteBufferToFile( std::ofstream& outputFile, OMX_BUFFERHEADERTYPE* buffer );
 
 private:
     CommonFunctions();
