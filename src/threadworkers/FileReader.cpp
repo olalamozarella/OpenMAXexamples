@@ -42,7 +42,8 @@ FileReader::~FileReader()
 
 bool FileReader::DoSomething()
 {
-    if ( d->component == NULL || d->inputFile == NULL ) {
+    if ( d->component == NULL || d->inputFile == NULL )
+    {
         LOG_ERR( "Cannot start fileReader - NULL member variables" );
         return false;
     }

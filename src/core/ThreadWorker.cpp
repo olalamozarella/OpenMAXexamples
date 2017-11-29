@@ -58,6 +58,7 @@ bool ThreadWorker::WaitForThreadJoin()
     LOG_INFO( "ThreadWorker - Waiting for child thread join" );
     pthread_join( d->workerThread, NULL );
     LOG_INFO( "ThreadWorker - Thread joined" );
+    return true;
 }
 
 bool ThreadWorker::DoSomething()
@@ -94,4 +95,3 @@ bool ThreadWorker::ShouldFinish()
 
     return result;
 }
-

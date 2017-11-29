@@ -29,6 +29,7 @@ EventLocker::DataClass::~DataClass()
 
 EventLocker::EventLocker()
 {
+    LOG_INFO( "EventLocker - plain cnstctr" );
     d = new DataClass();
 
     bool ok = Init();
