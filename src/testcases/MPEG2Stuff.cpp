@@ -169,7 +169,7 @@ void MPEG2Stuff::Run()
     bool portSettingChangedOccured = false;
     while ( portSettingChangedOccured == false ) {
         OMX_BUFFERHEADERTYPE* buffer;
-        ok = d->decoder->GetInputBuffer( DecoderMPEG2::InputPort, buffer );
+        ok = d->decoder->WaitForInputBuffer( DecoderMPEG2::InputPort, buffer );
         if ( ( ok == false ) || ( buffer == NULL ) ) {
             LOG_ERR( "Error get input buffer" );
             break;
@@ -223,7 +223,7 @@ void MPEG2Stuff::Run()
 
     while ( true ) {
         OMX_BUFFERHEADERTYPE* buffer;
-        ok = d->decoder->GetInputBuffer( DecoderMPEG2::InputPort, buffer );
+        ok = d->decoder->WaitForInputBuffer( DecoderMPEG2::InputPort, buffer );
         if ( ( ok == false ) || ( buffer == NULL ) ) {
             LOG_ERR( "Error get input buffer" );
             break;
@@ -259,7 +259,7 @@ void MPEG2Stuff::Run()
             break;
         } else {
             LOG_WARN( "Not all buffers are available: allocated=" + INT2STR( allocatedCount ) + " available:" + INT2STR( availableCount ) );
-            ok = d->decoder->WaitForEmptyBufferDone( 100 );
+            ok = d->decoder->WaitForBufferEvent( DecoderMPEG2::InputPort, 100 );
             if ( ok == false ) {
                 LOG_ERR( "Not all buffers are available - timeout occured" );
             }

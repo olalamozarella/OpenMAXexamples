@@ -1,6 +1,6 @@
 #include "EncodeVideo.h"
 
-#include "src/core/Component.h"
+#include "src/components/EncoderH264.h"
 
 class EncodeVideo::DataClass
 {
@@ -8,12 +8,12 @@ public:
     DataClass();
     ~DataClass();
 
-    Component* encoderComponent;
+    EncoderH264* encoderComponent;
 };
 
 EncodeVideo::DataClass::DataClass()
 {
-    encoderComponent = new Component( "OMX.broadcom.video_encode" );
+    encoderComponent = new EncoderH264();
 }
 
 EncodeVideo::DataClass::~DataClass()

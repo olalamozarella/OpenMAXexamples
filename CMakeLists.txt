@@ -32,6 +32,8 @@ set( LIB_HEADERS
     src/core/Timer.h
     src/core/EventLocker.h
     src/core/Tunnel.h
+    src/core/ThreadWorker.h
+    src/threadworkers/FileReader.h
     src/components/DecoderH264.h
     src/components/VideoRenderer.h
     src/components/DecoderMPEG2.h
@@ -48,6 +50,8 @@ set( LIB_SOURCES
     src/core/Timer.cpp
     src/core/EventLocker.cpp
     src/core/Tunnel.cpp
+    src/core/ThreadWorker.cpp
+    src/threadworkers/FileReader.cpp
     src/components/DecoderH264.cpp
     src/components/VideoRenderer.cpp
     src/components/DecoderMPEG2.cpp

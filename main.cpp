@@ -13,6 +13,8 @@
 #include "src/testcases/MPEG2Stuff.h"
 #include "src/testcases/ImageDecodeRender.h"
 
+#include "ilclient.h"
+
 using namespace std;
 
 int main()
@@ -36,20 +38,20 @@ int main()
 //    buffersNoIL.Run();
 //    buffersNoIL.Destroy();
 
-//    VideoDecodeRender testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
+    VideoDecodeRender testcase;
+    testcase.Init();
+    testcase.Run();
+    testcase.Destroy();
 
 //    MPEG2Stuff testcase;
 //    testcase.Init();
 //    testcase.Run();
 //    testcase.Destroy();
 
-    ImageDecodeRender testcase;
-    testcase.Init();
-    testcase.Run();
-    testcase.Destroy();
+//    ImageDecodeRender testcase;
+//    testcase.Init();
+//    testcase.Run();
+//    testcase.Destroy();
 
     bcm_host_deinit();
 

@@ -6,7 +6,6 @@
 #include "Logger.h"
 #include "CommonFunctions.h"
 
-
 #define NANOSECONDS_IN_SECOND         1000000000
 
 class EventLocker::DataClass
@@ -30,7 +29,14 @@ EventLocker::DataClass::~DataClass()
 
 EventLocker::EventLocker()
 {
+    LOG_INFO( "EventLocker - plain cnstctr" );
     d = new DataClass();
+
+    bool ok = Init();
+    if ( ok == false )
+    {
+        LOG_ERR( "Error Init eventLocker" );
+    }
 }
 
 EventLocker::~EventLocker()
@@ -110,15 +116,15 @@ bool EventLocker::WaitForEvent( int msTimeout )
     struct timeval now;
     gettimeofday( &now, NULL );
     timeToWait.tv_sec = now.tv_sec;
-    if ( msTimeout == EVENT_HANDLER_TIMEOUT_MS_MAX ){
+    if ( msTimeout == EVENT_HANDLER_TIMEOUT_MS_MAX ) {
         timeToWait.tv_nsec = ( now.tv_usec + EVENT_HANDLER_TIMEOUT_MS_MAX * 1000 ) * 1000;
-    } else if ( msTimeout == EVENT_HANDLER_TIMEOUT_MS_DEFAULT ){
+    } else if ( msTimeout == EVENT_HANDLER_TIMEOUT_MS_DEFAULT ) {
         timeToWait.tv_nsec = ( now.tv_usec + EVENT_HANDLER_TIMEOUT_MS_DEFAULT * 1000 ) * 1000;
     } else {
         timeToWait.tv_nsec = ( now.tv_usec + msTimeout * 1000 ) * 1000;
     }
 
-    while ( timeToWait.tv_nsec > NANOSECONDS_IN_SECOND ){
+    while ( timeToWait.tv_nsec > NANOSECONDS_IN_SECOND ) {
         timeToWait.tv_nsec -= NANOSECONDS_IN_SECOND;
         timeToWait.tv_sec++;
     }

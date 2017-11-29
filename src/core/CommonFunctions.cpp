@@ -273,8 +273,10 @@ string CommonFunctions::IntToString( int a )
     return s.str();
 }
 
-bool CommonFunctions::ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer )
+bool CommonFunctions::ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer, bool& foundEOF )
 {
+    foundEOF = false;
+
     if ( buffer == NULL ) {
         LOG_ERR( "NULL buffer" );
         return false;
@@ -299,6 +301,7 @@ bool CommonFunctions::ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYP
         //LOG_INFO( "File read successful" );
     } else if ( inputFile.eof() == true ) {
         LOG_WARN( "Found EOF" );
+        foundEOF = true;
         buffer->nFlags |= OMX_BUFFERFLAG_EOS;
     } else {
         LOG_ERR( "File read error" );
@@ -307,6 +310,33 @@ bool CommonFunctions::ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYP
     long readBytes = inputFile.gcount();
     buffer->nFilledLen = readBytes;
     //LOG_INFO( "Bytes read: " + INT2STR( readBytes ) );
+
+    return true;
+}
+
+bool CommonFunctions::WriteBufferToFile( ofstream& outputFile, OMX_BUFFERHEADERTYPE* buffer )
+{
+    if ( buffer == NULL ) {
+        LOG_ERR( "NULL buffer" );
+        return false;
+    }
+
+    if ( outputFile.is_open() == false ) {
+        LOG_ERR( "File is not open" );
+        return false;
+    }
+
+    if ( outputFile.good() == false ) {
+        LOG_ERR( "input file stream is not good" );
+        return false;
+    }
+
+    outputFile.write( (char*)buffer->pBuffer, buffer->nFilledLen );
+
+    if ( outputFile.good() == false ) {
+        LOG_ERR( "write buffer to file failed" );
+        return false;
+    }
 
     return true;
 }

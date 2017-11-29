@@ -4,7 +4,7 @@
 #include "src/core/ProjectDefines.h"
 
 /**
- * @brief Class for handling pthread_mutex_t and pthread_cond_t
+ * @brief Class for wrapping mutex locking and conditional waiting
  */
 class EventLocker
 {
