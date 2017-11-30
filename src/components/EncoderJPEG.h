@@ -10,6 +10,8 @@ public:
 
     static const int InputPort = 340;
     static const int OutputPort = 341;
+
+    bool SetOutputImageParameters();
 };
 
 #endif // ENCODERJPEG_H

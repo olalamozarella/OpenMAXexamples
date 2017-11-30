@@ -4,7 +4,6 @@
 
 #include "src/core/CommonFunctions.h"
 #include "src/core/Logger.h"
-#include "src/core/Tunnel.h"
 #include "src/components/EncoderH264.h"
 #include "src/threadworkers/FileReader.h"
 #include "src/threadworkers/FileWriter.h"

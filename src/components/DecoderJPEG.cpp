@@ -8,12 +8,12 @@ DecoderJPEG::DecoderJPEG()
 {
 }
 
-bool DecoderJPEG::SetImageFormat()
+bool DecoderJPEG::SetImageParameters()
 {
     OMX_IMAGE_PARAM_PORTFORMATTYPE imagePortFormat;
     CommonFunctions::InitStructure( imagePortFormat );
 
-    imagePortFormat.nPortIndex = 320;
+    imagePortFormat.nPortIndex = InputPort;
     imagePortFormat.eCompressionFormat = OMX_IMAGE_CodingJPEG;
 
     bool ok = SetParameter( OMX_IndexParamImagePortFormat, &imagePortFormat );
@@ -26,4 +26,3 @@ bool DecoderJPEG::SetImageFormat()
 
     return true;
 }
-

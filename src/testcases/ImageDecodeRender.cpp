@@ -105,7 +105,7 @@ void ImageDecodeRender::Run()
 
     LOG_INFO( "Actual renderer state: " + d->renderer->GetComponentState() );
 
-    ok = d->decoder->SetImageFormat();
+    ok = d->decoder->SetImageParameters();
     if ( ok == false ) {
         LOG_ERR( "Error setting decoder params" );
         return;
