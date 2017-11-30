@@ -160,16 +160,12 @@ void DecodeVideo::Run()
         return;
     }
 
-    LOG_WARN( "tlololololo" );
-
     ok = d->decoder->EnablePortBuffers( DecoderH264::OutputPort );
     if ( ok == false ) {
         LOG_ERR( "Error enabling output ports" );
         return;
     }
     d->outputBuffersCreated = true;
-
-    LOG_WARN( "tralalalala" );
 
     ok = d->decoder->ChangeState( OMX_StateExecuting );
     if ( ok == false ) {

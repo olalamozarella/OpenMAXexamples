@@ -70,8 +70,8 @@ int main()
     testcase.Destroy();
 
     LOG_INFO( "Main - Testcase finished" );
+
     bcm_host_deinit();
-    LOG_INFO( "Main - BCM host deinited" );
 
     clock_gettime(CLOCK_MONOTONIC, &finish);
 

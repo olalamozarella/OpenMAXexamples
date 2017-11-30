@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#define LOG_PRINT_INFO
+//#define LOG_PRINT_INFO
 #define LOG_PRINT_VERBOSE_INFO
 #define LOG_PRINT_WARN
 
