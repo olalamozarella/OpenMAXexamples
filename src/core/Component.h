@@ -160,6 +160,22 @@ public:
     bool WaitForInputBuffer( const OMX_U32 port, OMX_BUFFERHEADERTYPE*& buffer );
 
     /**
+     * @brief WaitForOutputBuffer - waits until buffer event for specified port occurs, removes event from list, returns buffer
+     * @param port
+     * @param buffer
+     * @return true if successful, false otherwise
+     */
+    bool WaitForOutputBuffer( const OMX_U32 port, OMX_BUFFERHEADERTYPE*& buffer );
+
+    /**
+     * @brief TakeOutputBufferFromCollection - takes buffer from port-buffer collection
+     * @param port
+     * @param buffer
+     * @return
+     */
+    bool TakeOutputBufferFromCollection( const OMX_U32 port, OMX_BUFFERHEADERTYPE*& buffer );
+
+    /**
      * @brief AddAllocatedBufferToMap - adds buffer header to buffer map for specified port
      * @param port
      * @param buffer

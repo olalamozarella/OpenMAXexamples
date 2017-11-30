@@ -34,6 +34,7 @@ set( LIB_HEADERS
     src/core/Tunnel.h
     src/core/ThreadWorker.h
     src/threadworkers/FileReader.h
+    src/threadworkers/FileWriter.h
     src/components/DecoderH264.h
     src/components/VideoRenderer.h
     src/components/DecoderMPEG2.h
@@ -52,6 +53,7 @@ set( LIB_SOURCES
     src/core/Tunnel.cpp
     src/core/ThreadWorker.cpp
     src/threadworkers/FileReader.cpp
+    src/threadworkers/FileWriter.cpp
     src/components/DecoderH264.cpp
     src/components/VideoRenderer.cpp
     src/components/DecoderMPEG2.cpp
@@ -73,6 +75,7 @@ set( BINARY_HEADERS
     src/testcases/ImageDecodeRender.h
     src/testcases/EncodeImage.h
     src/testcases/EncodeVideo.h
+    src/testcases/DecodeVideo.h
 )
 
 # List of all source files that belong to this project
@@ -89,6 +92,7 @@ set( BINARY_SOURCES
     src/testcases/ImageDecodeRender.cpp
     src/testcases/EncodeImage.cpp
     src/testcases/EncodeVideo.cpp
+    src/testcases/DecodeVideo.cpp
 )
 
 # Create library with core&components

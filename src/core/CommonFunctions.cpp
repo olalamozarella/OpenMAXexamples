@@ -300,7 +300,7 @@ bool CommonFunctions::ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYP
     if ( inputFile.good() == true ) {
         //LOG_INFO( "File read successful" );
     } else if ( inputFile.eof() == true ) {
-        LOG_WARN( "Found EOF" );
+        LOG_INFO_VERBOSE( "Found EOF" );
         foundEOF = true;
         buffer->nFlags |= OMX_BUFFERFLAG_EOS;
     } else {

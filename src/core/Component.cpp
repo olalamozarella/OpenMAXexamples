@@ -208,7 +208,7 @@ bool Component::ChangeState( const OMX_STATETYPE state )
         return false;
     }
 
-    WaitForEvent( OMX_EventCmdComplete, OMX_CommandStateSet, state, EVENT_HANDLER_TIMEOUT_MS_DEFAULT );
+    WaitForEvent( OMX_EventCmdComplete, OMX_CommandStateSet, state, EVENT_HANDLER_TIMEOUT_MS_MAX );
 
     return true;
 }
@@ -612,7 +612,7 @@ bool Component::WaitForEvent( const OMX_EVENTTYPE eventType, const OMX_U32 data1
 
             ok = d->eventLocker.WaitForEvent( msTimeout );
             if ( ok == false ) {
-                LOG_ERR( GetComponentName() + ":error waiting for event" );
+                LOG_ERR( GetComponentName() + ":error waiting for event" + CommonFunctions::EventTypeToString( eventType, data1 ) );
                 return false;
             }
         }
@@ -638,10 +638,8 @@ bool Component::RemoveBufferFromCollection( const OMX_U32 port, const OMX_BUFFER
     }
 
     list<OMX_BUFFERHEADERTYPE*>& bufferList = d->emptyBuffers[ port ];
-    for ( list<OMX_BUFFERHEADERTYPE*>::iterator iter = bufferList.begin(); iter != bufferList.end(); iter++ )
-    {
-        if ( *iter == buffer )
-        {
+    for ( list<OMX_BUFFERHEADERTYPE*>::iterator iter = bufferList.begin(); iter != bufferList.end(); iter++ ) {
+        if ( *iter == buffer ) {
             LOG_INFO( GetComponentName() + ":Buffer erased from list" );
             bufferList.erase( iter );
             portBufferLocker->Unlock();
@@ -675,6 +673,61 @@ bool Component::WaitForInputBuffer( const OMX_U32 port, OMX_BUFFERHEADERTYPE*& b
         }
         portBufferLocker->Lock();
         LOG_INFO( GetComponentName() + ":Wakeup - new available buffer" );
+    }
+
+    buffer = bufferList.front();
+    bufferList.pop_front();
+    portBufferLocker->Unlock();
+    return true;
+}
+
+bool Component::WaitForOutputBuffer( const OMX_U32 port, OMX_BUFFERHEADERTYPE*& buffer )
+{
+    EventLocker* portBufferLocker = d->GetPortBufferLocker( port );
+    portBufferLocker->Lock();
+    if ( d->emptyBuffers.find( port ) == d->emptyBuffers.end() ) {
+        LOG_ERR( GetComponentName() + ":Buffer list for this port does not exist" );
+        portBufferLocker->Unlock();
+        return false;
+    }
+
+    if ( d->fillBufferDoneList.empty() == true ) {
+        portBufferLocker->Unlock();
+        bool ok = portBufferLocker->WaitForEvent( EVENT_HANDLER_TIMEOUT_MS_MAX );
+        if ( ok == false ) {
+            LOG_ERR( "No available buffer after timeout passed" );
+            return false;
+        }
+        portBufferLocker->Lock();
+        LOG_INFO( GetComponentName() + ":Wakeup - new available buffer" );
+    }
+
+    FillBufferDone event = d->fillBufferDoneList.front();
+    buffer = event.buffer;
+    if ( buffer == NULL ) {
+        LOG_ERR( "Error waiting for output buffer - buffer in event is null" );
+        return false;
+    }
+
+    d->fillBufferDoneList.pop_front();
+    portBufferLocker->Unlock();
+    return true;
+}
+
+bool Component::TakeOutputBufferFromCollection( const OMX_U32 port, OMX_BUFFERHEADERTYPE*& buffer )
+{
+    EventLocker* portBufferLocker = d->GetPortBufferLocker( port );
+    portBufferLocker->Lock();
+    if ( d->emptyBuffers.find( port ) == d->emptyBuffers.end() ) {
+        LOG_ERR( GetComponentName() + ":Buffer list for this port does not exist" );
+        portBufferLocker->Unlock();
+        return false;
+    }
+
+    list<OMX_BUFFERHEADERTYPE*>& bufferList = d->emptyBuffers[ port ];
+    if ( bufferList.size() == 0 ) {
+        LOG_ERR( "No buffers in collection" );
+        return false;
     }
 
     buffer = bufferList.front();

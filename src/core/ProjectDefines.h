@@ -12,6 +12,7 @@
 #define TESTCASE_NAME_IMAGE_DECODE_RENDER       "ImageDecodeRender"
 #define TESTCASE_NAME_ENCODE_IMAGE              "EncodeImage"
 #define TESTCASE_NAME_ENCODE_VIDEO              "EncodeVideo"
+#define TESTCASE_NAME_DECODE_VIDEO              "DecodeVideo"
 
 #define EVENT_HANDLER_TIMEOUT_MS_DEFAULT        5
 #define EVENT_HANDLER_TIMEOUT_MS_MAX            1000

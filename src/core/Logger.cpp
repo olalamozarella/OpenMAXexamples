@@ -5,11 +5,14 @@
 
 using namespace std;
 
-void Logger::Info( string message , string /*file*/, int /*lineNumber*/ )
+void Logger::Info( string message , string file, int lineNumber , bool verbose )
 {
-    //printf( "INFO: %s (%s:%d)\n", message.c_str(), file.c_str(), lineNumber );
     PrintCurrentTime();
-    printf( "INFO: %s\n", message.c_str() );
+    if ( verbose == true ) {
+        printf( "INFO: %s (%s:%d)\n", message.c_str(), file.c_str(), lineNumber );
+    } else {
+        printf( "INFO: %s\n", message.c_str() );
+    }
 }
 
 void Logger::Warning( string message , string file, int lineNumber )

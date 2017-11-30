@@ -12,6 +12,7 @@
 #include "src/testcases/VideoDecodeRender.h"
 #include "src/testcases/MPEG2Stuff.h"
 #include "src/testcases/ImageDecodeRender.h"
+#include "src/testcases/DecodeVideo.h"
 
 #include "ilclient.h"
 
@@ -38,10 +39,10 @@ int main()
 //    buffersNoIL.Run();
 //    buffersNoIL.Destroy();
 
-    VideoDecodeRender testcase;
-    testcase.Init();
-    testcase.Run();
-    testcase.Destroy();
+//    VideoDecodeRender testcase;
+//    testcase.Init();
+//    testcase.Run();
+//    testcase.Destroy();
 
 //    MPEG2Stuff testcase;
 //    testcase.Init();
@@ -52,6 +53,11 @@ int main()
 //    testcase.Init();
 //    testcase.Run();
 //    testcase.Destroy();
+
+    DecodeVideo testcase;
+    testcase.Init();
+    testcase.Run();
+    testcase.Destroy();
 
     bcm_host_deinit();
 

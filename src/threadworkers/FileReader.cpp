@@ -11,7 +11,7 @@ class FileReader::DataClass
 public:
     DataClass()
     {
-        workingPort = 0;
+        port = 0;
         component = NULL;
         inputFile = NULL;
     }
@@ -22,7 +22,7 @@ public:
 
     Component* component;
     ifstream* inputFile;
-    OMX_U32 workingPort;
+    OMX_U32 port;
 };
 
 FileReader::FileReader( Component* component, ifstream* inputFile, OMX_U32 port )
@@ -32,7 +32,7 @@ FileReader::FileReader( Component* component, ifstream* inputFile, OMX_U32 port 
 
     d->component = component;
     d->inputFile = inputFile;
-    d->workingPort = port;
+    d->port = port;
 }
 
 FileReader::~FileReader()
@@ -42,13 +42,12 @@ FileReader::~FileReader()
 
 bool FileReader::DoSomething()
 {
-    if ( d->component == NULL || d->inputFile == NULL )
-    {
+    if ( d->component == NULL || d->inputFile == NULL ) {
         LOG_ERR( "Cannot start fileReader - NULL member variables" );
         return false;
     }
 
-    LOG_INFO( "FileReader - DoSomething" );
+    LOG_INFO_VERBOSE( "FileReader - DoSomething" );
 
     bool foundEOF = false;
     bool ok = true;
@@ -57,7 +56,7 @@ bool FileReader::DoSomething()
         // Wait for available input buffer from component port-buffer collection
         //  Buffer will be removed from component port-buffer collection!
         OMX_BUFFERHEADERTYPE* buffer;
-        ok = d->component->WaitForInputBuffer( d->workingPort, buffer );
+        ok = d->component->WaitForInputBuffer( d->port, buffer );
         if ( ( ok == false ) || ( buffer == NULL ) ) {
             LOG_ERR( "Error get input buffer" );
             break;
@@ -68,7 +67,7 @@ bool FileReader::DoSomething()
         if ( ok == false ) {
             // If reading fails, buffer is still empty and should be returned to component port-buffer collection.
             LOG_ERR( "read file failed - adding buffer back to map" );
-            ok = d->component->AddAllocatedBufferToMap( d->workingPort, buffer );
+            ok = d->component->AddAllocatedBufferToMap( d->port, buffer );
             if ( ok == false ) {
                 LOG_ERR( "Cannot add allocated buffer to map manually" );
             }
@@ -79,6 +78,10 @@ bool FileReader::DoSomething()
         ok = d->component->EmptyThisBuffer( buffer );
         if ( ok == false ) {
             LOG_ERR( "empty first buffer failed" );
+            ok = d->component->AddAllocatedBufferToMap( d->port, buffer );
+            if ( ok == false ) {
+                LOG_ERR( "Cannot add allocated buffer to map manually" );
+            }
             break;
         }
 
@@ -92,18 +95,18 @@ bool FileReader::DoSomething()
     int availableCount = 0;
     int allocatedCount = 0;
     while ( ShouldFinish() == false ) {
-        ok = d->component->GetBufferCount( d->workingPort, availableCount, allocatedCount );
+        ok = d->component->GetBufferCount( d->port, availableCount, allocatedCount );
         if ( ok == false ) {
             LOG_ERR( "Error measuring buffer count" );
             break;
         }
 
         if ( availableCount == allocatedCount ) {
-            LOG_INFO( "All buffers are available" );
+            LOG_INFO_VERBOSE( "All buffers are available" );
             break;
         } else {
             LOG_WARN( "Not all buffers are available: allocated=" + INT2STR( allocatedCount ) + " available:" + INT2STR( availableCount ) );
-            ok = d->component->WaitForBufferEvent( d->workingPort, 100 );
+            ok = d->component->WaitForBufferEvent( d->port, 100 );
             if ( ok == false ) {
                 LOG_ERR( "Not all buffers are available - timeout occured" );
             }
@@ -111,7 +114,7 @@ bool FileReader::DoSomething()
     }
 
     // File is read, all buffers are processed - finish. Buffer cleanup is done by FileReader's owner.
-    LOG_INFO( "FileReader - finishing executing" );
+    LOG_INFO_VERBOSE( "FileReader - finishing executing" );
     return true;
 }
 
