@@ -80,7 +80,7 @@ bool FileWriter::DoSomething()
         OMX_BUFFERHEADERTYPE* buffer;
         ok = d->component->WaitForOutputBuffer( d->port, buffer );
         if ( ok == false ) {
-            LOG_ERR( "No available buffer after timeout passed" );
+            LOG_WARN( "No available output buffer after timeout passed" );
             continue;
         }
 
@@ -88,7 +88,7 @@ bool FileWriter::DoSomething()
             foundEOS = true;
         }
 
-        ok = CommonFunctions::WriteBufferToFile( *d->outputFile, buffer );
+        //ok = CommonFunctions::WriteBufferToFile( *d->outputFile, buffer );
         if ( ok == false ) {
             // If reading fails, buffer is still empty and should be returned to component port-buffer collection.
             LOG_ERR( "read file failed - adding buffer back to map" );

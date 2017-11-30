@@ -58,8 +58,8 @@ bool FileReader::DoSomething()
         OMX_BUFFERHEADERTYPE* buffer;
         ok = d->component->WaitForInputBuffer( d->port, buffer );
         if ( ( ok == false ) || ( buffer == NULL ) ) {
-            LOG_ERR( "Error get input buffer" );
-            break;
+            LOG_WARN( "No available input buffer after timeout passed" );
+            continue;
         }
 
         // Read file and save it to buffer. Set EOF flag if end of file is reached.

@@ -142,7 +142,7 @@ void DecodeVideo::Run()
             break;
         }
 
-        portSettingChangedOccured = d->decoder->WaitForEvent( OMX_EventPortSettingsChanged, DecoderH264::OutputPort, 0, EVENT_HANDLER_NO_TIMEOUT );
+        portSettingChangedOccured = d->decoder->WaitForEvent( OMX_EventPortSettingsChanged, DecoderH264::OutputPort, 0, EVENT_HANDLER_TIMEOUT_MS_EXTENDED );
     }
 
     ok = d->decoder->ChangeState( OMX_StateIdle );
@@ -151,12 +151,16 @@ void DecodeVideo::Run()
         return;
     }
 
+    LOG_WARN( "tlololololo" );
+
     ok = d->decoder->EnablePortBuffers( DecoderH264::OutputPort );
     if ( ok == false ) {
         LOG_ERR( "Error enabling output ports" );
         return;
     }
     d->outputBuffersCreated = true;
+
+    LOG_WARN( "tralalalala" );
 
     ok = d->decoder->ChangeState( OMX_StateExecuting );
     if ( ok == false ) {
@@ -171,12 +175,6 @@ void DecodeVideo::Run()
     fileReader.Start();
     fileReader.WaitForThreadJoin();
     fileWriter.WaitForThreadJoin();
-
-    ok = d->decoder->ChangeState( OMX_StateIdle );
-    if ( ok == false ) {
-        LOG_ERR( "Error changing decoder state to idle" );
-        return;
-    }
 
     LOG_INFO( "Finished run" );
 }

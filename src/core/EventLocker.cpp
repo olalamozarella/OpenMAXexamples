@@ -117,7 +117,8 @@ bool EventLocker::WaitForEvent( int msTimeout )
     gettimeofday( &now, NULL );
     timeToWait.tv_sec = now.tv_sec;
     if ( msTimeout == EVENT_HANDLER_TIMEOUT_MS_MAX ) {
-        timeToWait.tv_nsec = ( now.tv_usec + EVENT_HANDLER_TIMEOUT_MS_MAX * 1000 ) * 1000;
+        timeToWait.tv_sec += ( EVENT_HANDLER_TIMEOUT_MS_MAX / 1000 );
+        timeToWait.tv_nsec = ( now.tv_usec + ( EVENT_HANDLER_TIMEOUT_MS_MAX % 1000 ) * 1000 ) * 1000;
     } else if ( msTimeout == EVENT_HANDLER_TIMEOUT_MS_DEFAULT ) {
         timeToWait.tv_nsec = ( now.tv_usec + EVENT_HANDLER_TIMEOUT_MS_DEFAULT * 1000 ) * 1000;
     } else {

@@ -4,6 +4,7 @@
 #include "bcm_host.h"
 
 //project includes
+#include "src/core/Logger.h"
 #include "src/testcases/SystemInfo.h"
 #include "src/testcases/ListComponents.h"
 #include "src/testcases/PortInfo.h"
@@ -59,9 +60,9 @@ int main()
     testcase.Run();
     testcase.Destroy();
 
+    LOG_INFO( "Main - Testcase finished" );
     bcm_host_deinit();
-
-    sleep( 10 );
+    LOG_INFO( "Main - BCM host deinited" );
 
     return 0;
 }

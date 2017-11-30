@@ -303,7 +303,7 @@ bool Component::EnablePortBuffers( const OMX_U32 port )
 
     portBufferLocker->Unlock();
 
-    WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortEnable, port, EVENT_HANDLER_TIMEOUT_MS_DEFAULT );
+    WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortEnable, port, EVENT_HANDLER_TIMEOUT_MS_MAX );
 
     return true;
 }
@@ -612,7 +612,7 @@ bool Component::WaitForEvent( const OMX_EVENTTYPE eventType, const OMX_U32 data1
 
             ok = d->eventLocker.WaitForEvent( msTimeout );
             if ( ok == false ) {
-                LOG_ERR( GetComponentName() + ":error waiting for event" + CommonFunctions::EventTypeToString( eventType, data1 ) );
+                LOG_WARN( GetComponentName() + ": event did not come during timeout" + CommonFunctions::EventTypeToString( eventType, data1 ) );
                 return false;
             }
         }
