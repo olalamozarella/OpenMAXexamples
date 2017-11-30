@@ -6,6 +6,7 @@
 #include "IL/OMX_Component.h"
 
 #define INT2STR CommonFunctions::IntToString
+#define FLOAT2STR CommonFunctions::FloatToString
 
 class CommonFunctions
 {
@@ -23,6 +24,7 @@ public:
     static void InitStructure( OMX_IMAGE_PARAM_PORTFORMATTYPE& structure );
 
     static std::string IntToString( int a );
+    static std::string FloatToString( double a );
 
     static bool ReadFileToBuffer( std::ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer, bool& foundEOF );
     static bool WriteBufferToFile( std::ofstream& outputFile, OMX_BUFFERHEADERTYPE* buffer );

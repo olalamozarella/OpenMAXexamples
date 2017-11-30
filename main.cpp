@@ -5,6 +5,7 @@
 
 //project includes
 #include "src/core/Logger.h"
+#include "src/core/CommonFunctions.h"
 #include "src/testcases/SystemInfo.h"
 #include "src/testcases/ListComponents.h"
 #include "src/testcases/PortInfo.h"
@@ -24,6 +25,11 @@ using namespace std;
 
 int main()
 {
+    struct timespec start, finish;
+    double elapsed;
+
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
     bcm_host_init();
 
 //    SystemInfo systemInfo;
@@ -66,6 +72,13 @@ int main()
     LOG_INFO( "Main - Testcase finished" );
     bcm_host_deinit();
     LOG_INFO( "Main - BCM host deinited" );
+
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+
+    elapsed = (finish.tv_sec - start.tv_sec);
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+    LOG_INFO_VERBOSE( "Total time: " + FLOAT2STR( elapsed ) );
 
     return 0;
 }

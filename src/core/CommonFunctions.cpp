@@ -273,6 +273,13 @@ string CommonFunctions::IntToString( int a )
     return s.str();
 }
 
+string CommonFunctions::FloatToString( double a )
+{
+    stringstream s;
+    s << a;
+    return s.str();
+}
+
 bool CommonFunctions::ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer, bool& foundEOF )
 {
     foundEOF = false;
@@ -331,7 +338,7 @@ bool CommonFunctions::WriteBufferToFile( ofstream& outputFile, OMX_BUFFERHEADERT
         return false;
     }
 
-    outputFile.write( (char*)buffer->pBuffer, buffer->nFilledLen );
+    outputFile.write( ( char* )buffer->pBuffer, buffer->nFilledLen );
 
     if ( outputFile.good() == false ) {
         LOG_ERR( "write buffer to file failed" );

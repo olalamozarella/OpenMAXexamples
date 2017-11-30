@@ -3,23 +3,30 @@
 #include <stdio.h>
 #include <sys/time.h>
 
+#define LOG_PRINT_INFO
+#define LOG_PRINT_VERBOSE_INFO
+#define LOG_PRINT_WARN
+
 using namespace std;
 
 void Logger::Info( string message , string file, int lineNumber , bool verbose )
 {
-#ifdef LOGGER_PRINT_INFO
-    PrintCurrentTime();
     if ( verbose == true ) {
+#ifdef LOG_PRINT_VERBOSE_INFO
+        PrintCurrentTime();
         printf( "INFO: %s (%s:%d)\n", message.c_str(), file.c_str(), lineNumber );
-    } else {
-        printf( "INFO: %s\n", message.c_str() );
-    }
 #endif
+    } else {
+#ifdef LOG_PRINT_INFO
+        PrintCurrentTime();
+        printf( "INFO: %s\n", message.c_str() );
+#endif
+    }
 }
 
 void Logger::Warning( string message , string file, int lineNumber )
 {
-#ifdef LOGGER_PRINT_WARN
+#ifdef LOG_PRINT_WARN
     PrintCurrentTime();
     printf(  "WARNING: %s (%s:%d)\n", message.c_str(), file.c_str(), lineNumber );
 #endif
