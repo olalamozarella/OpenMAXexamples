@@ -29,7 +29,6 @@ public:
     bool outputBuffersCreated;
 };
 
-
 DecodeVideo::DataClass::DataClass()
 {
     inputBuffersCreated = false;
@@ -131,14 +130,24 @@ void DecodeVideo::Run()
         }
 
         ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer, foundEOF );
-        if ( ok == false ) {
-            LOG_ERR( "read file failed" );
+        if ( ok == false ) {           
+            // If reading fails, buffer is still empty and should be returned to component port-buffer collection.
+            LOG_ERR( "read file failed - adding buffer back to map" );
+            ok = d->decoder->AddAllocatedBufferToMap( DecoderH264::InputPort, buffer );
+            if ( ok == false ) {
+                LOG_ERR( "Cannot add allocated buffer to map manually" );
+            }
             break;
         }
 
         ok = d->decoder->EmptyThisBuffer( buffer );
         if ( ok == false ) {
-            LOG_ERR( "empty first buffer failed" );
+            // If reading fails, buffer is still empty and should be returned to component port-buffer collection.
+            LOG_ERR( "empty first buffer failed, adding buffer back to map" );
+            ok = d->decoder->AddAllocatedBufferToMap( DecoderH264::InputPort, buffer );
+            if ( ok == false ) {
+                LOG_ERR( "Cannot add allocated buffer to map manually" );
+            }
             break;
         }
 

@@ -7,18 +7,22 @@ using namespace std;
 
 void Logger::Info( string message , string file, int lineNumber , bool verbose )
 {
+#ifdef LOGGER_PRINT_INFO
     PrintCurrentTime();
     if ( verbose == true ) {
         printf( "INFO: %s (%s:%d)\n", message.c_str(), file.c_str(), lineNumber );
     } else {
         printf( "INFO: %s\n", message.c_str() );
     }
+#endif
 }
 
 void Logger::Warning( string message , string file, int lineNumber )
 {
+#ifdef LOGGER_PRINT_WARN
     PrintCurrentTime();
-    printf( "WARNING: %s (%s:%d)\n", message.c_str(), file.c_str(), lineNumber );
+    printf(  "WARNING: %s (%s:%d)\n", message.c_str(), file.c_str(), lineNumber );
+#endif
 }
 
 void Logger::Error( string message , string file, int lineNumber )

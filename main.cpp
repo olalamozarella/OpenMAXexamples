@@ -17,6 +17,9 @@
 
 #include "ilclient.h"
 
+#define LOGGER_PRINT_INFO
+#define LOGGER_PRINT_WARN
+
 using namespace std;
 
 int main()
