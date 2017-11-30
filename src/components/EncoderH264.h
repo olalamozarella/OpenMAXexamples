@@ -10,6 +10,8 @@ public:
 
     static const int InputPort = 200;
     static const int OutputPort = 201;
+
+    bool SetVideoParameters();
 };
 
 #endif // ENCODERH264_H

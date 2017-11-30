@@ -74,7 +74,7 @@ OMX_ERRORTYPE Component::DataClass::DisableAllPorts()
         }
     }
 
-    LOG_INFO( dataclassOwner->GetComponentName() + ":All ports disabled" );
+    LOG_INFO_VERBOSE( dataclassOwner->GetComponentName() + ":All ports disabled" );
     return err;
 }
 

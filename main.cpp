@@ -15,7 +15,7 @@
 #include "src/testcases/MPEG2Stuff.h"
 #include "src/testcases/ImageDecodeRender.h"
 #include "src/testcases/DecodeVideo.h"
-
+#include "src/testcases/EncodeVideo.h"
 #include "ilclient.h"
 
 #define LOGGER_PRINT_INFO
@@ -49,10 +49,10 @@ int main()
 //    buffersNoIL.Run();
 //    buffersNoIL.Destroy();
 
-//    VideoDecodeRender testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
+    VideoDecodeRender testcase;
+    testcase.Init();
+    testcase.Run();
+    testcase.Destroy();
 
 //    MPEG2Stuff testcase;
 //    testcase.Init();
@@ -64,10 +64,15 @@ int main()
 //    testcase.Run();
 //    testcase.Destroy();
 
-    DecodeVideo testcase;
-    testcase.Init();
-    testcase.Run();
-    testcase.Destroy();
+//    DecodeVideo testcase;
+//    testcase.Init();
+//    testcase.Run();
+//    testcase.Destroy();
+
+//    EncodeVideo testcase;
+//    testcase.Init();
+//    testcase.Run();
+//    testcase.Destroy();
 
     LOG_INFO( "Main - Testcase finished" );
 

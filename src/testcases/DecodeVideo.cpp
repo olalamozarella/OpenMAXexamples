@@ -178,6 +178,7 @@ void DecodeVideo::Run()
 
     FileReader fileReader( d->decoder, &d->inputFile, d->decoder->InputPort );
     fileReader.Start();
+
     fileReader.WaitForThreadJoin();
     fileWriter.WaitForThreadJoin();
 

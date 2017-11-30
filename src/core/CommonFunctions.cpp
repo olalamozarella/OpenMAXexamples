@@ -283,6 +283,7 @@ string CommonFunctions::FloatToString( double a )
 bool CommonFunctions::ReadFileToBuffer( ifstream& inputFile, OMX_BUFFERHEADERTYPE* buffer, bool& foundEOF )
 {
     foundEOF = false;
+    LOG_INFO( "Reading file, actual position: " + INT2STR( inputFile.tellg() ) );
 
     if ( buffer == NULL ) {
         LOG_ERR( "NULL buffer" );

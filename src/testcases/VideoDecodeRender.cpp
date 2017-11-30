@@ -10,7 +10,7 @@
 #include "src/components/VideoRenderer.h"
 #include "src/threadworkers/FileReader.h"
 
-#define FILENAME "test.h264"
+#define FILENAME "test.h264.encoded"
 
 using namespace std;
 
@@ -168,6 +168,12 @@ void VideoDecodeRender::Run()
     ok = d->decoder->EnablePort( DecoderH264::OutputPort );
     if ( ok == false ) {
         LOG_ERR( "Error enabling decoder output port" );
+        return;
+    }
+
+    ok = d->decoder->WaitForEvent( OMX_EventCmdComplete, OMX_CommandPortEnable, DecoderH264::OutputPort, EVENT_HANDLER_TIMEOUT_MS_MAX );
+    if ( ok == false ) {
+        LOG_ERR( "Error enabling renderer input port - event did not come during timeout" );
         return;
     }
 

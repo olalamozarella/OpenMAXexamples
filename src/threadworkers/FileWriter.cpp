@@ -88,7 +88,7 @@ bool FileWriter::DoSomething()
             foundEOS = true;
         }
 
-        //ok = CommonFunctions::WriteBufferToFile( *d->outputFile, buffer );
+        ok = CommonFunctions::WriteBufferToFile( *d->outputFile, buffer );
         if ( ok == false ) {
             // If reading fails, buffer is still empty and should be returned to component port-buffer collection.
             LOG_ERR( "read file failed - adding buffer back to map" );
