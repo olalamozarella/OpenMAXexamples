@@ -125,6 +125,7 @@ bool FileWriter::DoSomething()
             LOG_ERR( "Error measuring buffer count" );
             break;
         }
+
         if ( availableBufferCount == allocatedBufferCount ) {
             LOG_INFO_VERBOSE( "All buffers are available" );
             break;

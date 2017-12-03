@@ -22,7 +22,7 @@ class FileReader : public ThreadWorker
 {
 public:
     FileReader( Component* component, std::ifstream* inputFile, OMX_U32 port );
-    ~FileReader();
+    virtual ~FileReader();
 
     virtual bool DoSomething();
 

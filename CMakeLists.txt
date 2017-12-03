@@ -33,8 +33,11 @@ set( LIB_HEADERS
     src/core/EventLocker.h
     src/core/Tunnel.h
     src/core/ThreadWorker.h
+    src/core/TunnelEmulator.h
     src/threadworkers/FileReader.h
     src/threadworkers/FileWriter.h
+    src/threadworkers/TunnelBufferFeeder.h
+    src/threadworkers/TunnelBufferRedeemer.h
     src/components/DecoderH264.h
     src/components/VideoRenderer.h
     src/components/DecoderMPEG2.h
@@ -52,8 +55,11 @@ set( LIB_SOURCES
     src/core/EventLocker.cpp
     src/core/Tunnel.cpp
     src/core/ThreadWorker.cpp
+    src/core/TunnelEmulator.cpp
     src/threadworkers/FileReader.cpp
     src/threadworkers/FileWriter.cpp
+    src/threadworkers/TunnelBufferFeeder.cpp
+    src/threadworkers/TunnelBufferRedeemer.cpp
     src/components/DecoderH264.cpp
     src/components/VideoRenderer.cpp
     src/components/DecoderMPEG2.cpp

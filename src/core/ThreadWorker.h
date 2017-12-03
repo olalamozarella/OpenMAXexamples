@@ -9,7 +9,7 @@ class ThreadWorker
 {
 public:
     ThreadWorker();
-    ~ThreadWorker();
+    virtual ~ThreadWorker();
 
     /**
      * @brief Start - creates a new thread, which starts executing DoSomething() method.

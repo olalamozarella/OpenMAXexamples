@@ -13,7 +13,7 @@ class FileWriter : public ThreadWorker
 {
 public:
     FileWriter( Component* component, std::ofstream* outputFile, OMX_U32 port );
-    ~FileWriter();
+    virtual ~FileWriter();
 
     virtual bool DoSomething();
 
