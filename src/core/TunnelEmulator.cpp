@@ -1,6 +1,12 @@
 #include "TunnelEmulator.h"
 
+#include <list>
 #include "src/core/Component.h"
+#include "src/core/Logger.h"
+#include "src/threadworkers/TunnelBufferFeeder.h"
+#include "src/threadworkers/TunnelBufferRedeemer.h"
+
+using namespace std;
 
 class TunnelEmulator::DataClass
 {
@@ -14,6 +20,10 @@ public:
     OMX_U32 consumerPort;
 
     bool isFinishing;
+
+    list<OMX_BUFFERHEADERTYPE*> usedBuffers;
+    TunnelBufferFeeder* feederThread;
+    TunnelBufferRedeemer* redeemerThread;
 };
 
 TunnelEmulator::DataClass::DataClass()
@@ -24,11 +34,22 @@ TunnelEmulator::DataClass::DataClass()
     consumerPort = 0;
 
     isFinishing = false;
+
+    feederThread = NULL;
+    redeemerThread = NULL;
 }
 
 TunnelEmulator::DataClass::~DataClass()
 {
+    if ( feederThread != NULL ) {
+        delete feederThread;
+        feederThread = 0;
+    }
 
+    if ( redeemerThread != NULL ) {
+        delete redeemerThread;
+        redeemerThread = 0;
+    }
 }
 
 TunnelEmulator::TunnelEmulator( Component* producer, OMX_U32 producerPort, Component* consumer, OMX_U32 consumerPort )
@@ -39,6 +60,9 @@ TunnelEmulator::TunnelEmulator( Component* producer, OMX_U32 producerPort, Compo
     d->producerPort = producerPort;
     d->consumer = consumer;
     d->consumerPort = consumerPort;
+
+    d->feederThread = new TunnelBufferFeeder( d->producer, d->producerPort, d->consumer, d->consumerPort, &d->isFinishing );
+    d->redeemerThread = new TunnelBufferRedeemer( d->producer, d->producerPort, d->consumer, d->consumerPort, &d->isFinishing );
 }
 
 TunnelEmulator::~TunnelEmulator()
@@ -48,12 +72,30 @@ TunnelEmulator::~TunnelEmulator()
 
 bool TunnelEmulator::SetupTunnel()
 {
-    return false;
+    bool ok = d->producer->EnablePortBuffers( d->producerPort );
+    if ( ok == false ) {
+        LOG_ERR( "Error enabling producer port buffers" );
+        return false;
+    }
+
+    return true;
 }
 
 bool TunnelEmulator::StartTunnel()
 {
-    return false;
+    bool ok = d->feederThread->Start();
+    if ( ok == false ) {
+        LOG_ERR( "Error starting feeder thread" );
+        return false;
+    }
+
+    ok = d->redeemerThread->Start();
+    if ( ok == false ) {
+        LOG_ERR( "Error starting redeemer thread" );
+        return false;
+    }
+
+    return true;
 }
 
 bool TunnelEmulator::WaitForThreadJoin()

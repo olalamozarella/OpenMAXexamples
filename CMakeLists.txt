@@ -82,6 +82,7 @@ set( BINARY_HEADERS
     src/testcases/EncodeImage.h
     src/testcases/EncodeVideo.h
     src/testcases/DecodeVideo.h
+    src/testcases/ManualTunnelVideoDecodeRender.h
 )
 
 # List of all source files that belong to this project
@@ -99,6 +100,7 @@ set( BINARY_SOURCES
     src/testcases/EncodeImage.cpp
     src/testcases/EncodeVideo.cpp
     src/testcases/DecodeVideo.cpp
+    src/testcases/ManualTunnelVideoDecodeRender.cpp
 )
 
 # Create library with core&components
