@@ -10,7 +10,7 @@
 #include "src/components/VideoRenderer.h"
 #include "src/threadworkers/FileReader.h"
 
-#define FILENAME "test.h264.encoded"
+#define FILENAME "test.h264"
 
 using namespace std;
 

@@ -36,8 +36,6 @@ set( LIB_HEADERS
     src/core/TunnelEmulator.h
     src/threadworkers/FileReader.h
     src/threadworkers/FileWriter.h
-    src/threadworkers/TunnelBufferFeeder.h
-    src/threadworkers/TunnelBufferRedeemer.h
     src/components/DecoderH264.h
     src/components/VideoRenderer.h
     src/components/DecoderMPEG2.h
@@ -55,11 +53,8 @@ set( LIB_SOURCES
     src/core/EventLocker.cpp
     src/core/Tunnel.cpp
     src/core/ThreadWorker.cpp
-    src/core/TunnelEmulator.cpp
     src/threadworkers/FileReader.cpp
     src/threadworkers/FileWriter.cpp
-    src/threadworkers/TunnelBufferFeeder.cpp
-    src/threadworkers/TunnelBufferRedeemer.cpp
     src/components/DecoderH264.cpp
     src/components/VideoRenderer.cpp
     src/components/DecoderMPEG2.cpp
@@ -71,36 +66,26 @@ set( LIB_SOURCES
 # List of all header files that belong to this project
 set( BINARY_HEADERS
     src/testcases/TestCase.h
-    src/testcases/SystemInfo.h
-    src/testcases/ListComponents.h
-    src/testcases/PortInfo.h
-    src/testcases/NoBuffers.h
-    src/testcases/BuffersNoIL.h
     src/testcases/VideoDecodeRender.h
-    src/testcases/MPEG2Stuff.h
     src/testcases/ImageDecodeRender.h
+    src/testcases/MPEG2Stuff.h
     src/testcases/EncodeImage.h
+    src/testcases/DecodeImage.h
     src/testcases/EncodeVideo.h
     src/testcases/DecodeVideo.h
-    src/testcases/ManualTunnelVideoDecodeRender.h
 )
 
 # List of all source files that belong to this project
 set( BINARY_SOURCES
     main.cpp
     src/testcases/TestCase.cpp
-    src/testcases/SystemInfo.cpp
-    src/testcases/ListComponents.cpp
-    src/testcases/PortInfo.cpp
-    src/testcases/NoBuffers.cpp
-    src/testcases/BuffersNoIL.cpp
     src/testcases/VideoDecodeRender.cpp
-    src/testcases/MPEG2Stuff.cpp
     src/testcases/ImageDecodeRender.cpp
+    src/testcases/MPEG2Stuff.cpp
     src/testcases/EncodeImage.cpp
+    src/testcases/DecodeImage.cpp
     src/testcases/EncodeVideo.cpp
     src/testcases/DecodeVideo.cpp
-    src/testcases/ManualTunnelVideoDecodeRender.cpp
 )
 
 # Create library with core&components

@@ -51,10 +51,10 @@ int main()
 //    buffersNoIL.Run();
 //    buffersNoIL.Destroy();
 
-//    VideoDecodeRender testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
+    VideoDecodeRender testcase;
+    testcase.Init();
+    testcase.Run();
+    testcase.Destroy();
 
 //    MPEG2Stuff testcase;
 //    testcase.Init();
@@ -81,10 +81,10 @@ int main()
 //    testcase.Run();
 //    testcase.Destroy();
 
-    EncodeImage testcase;
-    testcase.Init();
-    testcase.Run();
-    testcase.Destroy();
+//    EncodeImage testcase;
+//    testcase.Init();
+//    testcase.Run();
+//    testcase.Destroy();
 
     LOG_INFO( "Main - Testcase finished" );
 
