@@ -152,6 +152,9 @@ void VideoDecodeRender::Run()
         portSettingChangedOccured = d->decoder->WaitForEvent( OMX_EventPortSettingsChanged, DecoderH264::OutputPort, 0, EVENT_HANDLER_NO_TIMEOUT );
     }
 
+    d->decoder->GetVideoParameters( d->decoder->OutputPort );
+    d->renderer->GetVideoParameters( d->renderer->InputPort );
+
     Tunnel tunnelDecoderRenderer( d->decoder, DecoderH264::OutputPort, d->renderer, VideoRenderer::InputPort );
     ok = tunnelDecoderRenderer.SetupTunnel();
     if ( ok == false ) {
@@ -194,6 +197,9 @@ void VideoDecodeRender::Run()
         LOG_ERR( "Error changing state to executing" );
         return;
     }
+
+    d->decoder->GetVideoParameters( d->decoder->OutputPort );
+    d->renderer->GetVideoParameters( d->renderer->InputPort );
 
     FileReader fileReader( d->decoder, &d->inputFile, d->decoder->InputPort );
     fileReader.Start();

@@ -42,6 +42,7 @@ set( LIB_HEADERS
     src/components/DecoderJPEG.h
     src/components/EncoderJPEG.h
     src/components/EncoderH264.h
+    src/components/NullSink.h
 )
 
 # source files for library
@@ -61,6 +62,7 @@ set( LIB_SOURCES
     src/components/DecoderJPEG.cpp
     src/components/EncoderJPEG.cpp
     src/components/EncoderH264.cpp
+    src/components/NullSink.cpp
 )
 
 # List of all header files that belong to this project
@@ -86,6 +88,8 @@ set( BINARY_SOURCES
     src/testcases/DecodeImage.cpp
     src/testcases/EncodeVideo.cpp
     src/testcases/DecodeVideo.cpp
+    src/testcases/DecodeVideoNullSink.cpp
+    src/testcases/EncodeVideoNullSink.cpp
 )
 
 # Create library with core&components

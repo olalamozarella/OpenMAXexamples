@@ -10,7 +10,7 @@
 #include "src/threadworkers/FileWriter.h"
 
 #define FILENAME "test.h264"
-#define OUTPUT_FILENAME "test.video.raw"
+#define OUTPUT_FILENAME "test.omx.yuv"
 
 using namespace std;
 
@@ -118,6 +118,8 @@ void DecodeVideo::Run()
         return;
     }
 
+    d->decoder->GetVideoParameters( d->decoder->OutputPort );
+
     //feed some data
     bool portSettingChangedOccured = false;
     bool foundEOF = false;
@@ -130,7 +132,7 @@ void DecodeVideo::Run()
         }
 
         ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer, foundEOF );
-        if ( ok == false ) {           
+        if ( ok == false ) {
             // If reading fails, buffer is still empty and should be returned to component port-buffer collection.
             LOG_ERR( "read file failed - adding buffer back to map" );
             ok = d->decoder->AddAllocatedBufferToMap( DecoderH264::InputPort, buffer );
@@ -153,6 +155,8 @@ void DecodeVideo::Run()
 
         portSettingChangedOccured = d->decoder->WaitForEvent( OMX_EventPortSettingsChanged, DecoderH264::OutputPort, 0, EVENT_HANDLER_TIMEOUT_MS_EXTENDED );
     }
+
+    d->decoder->GetVideoParameters( d->decoder->OutputPort );
 
     ok = d->decoder->ChangeState( OMX_StateIdle );
     if ( ok == false ) {

@@ -184,6 +184,8 @@ public:
      */
     bool AddAllocatedBufferToMap( const OMX_U32 port, OMX_BUFFERHEADERTYPE* buffer );
 
+    bool GetVideoParameters( const OMX_U32 port );
+
 private:
     class DataClass;
     DataClass* d;

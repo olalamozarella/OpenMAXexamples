@@ -10,7 +10,7 @@
 #include "src/threadworkers/FileWriter.h"
 
 #define FILENAME "test.jpg"
-#define OUTPUT_FILENAME "test.image.raw"
+#define OUTPUT_FILENAME "test.omx.image.yuv"
 
 using namespace std;
 

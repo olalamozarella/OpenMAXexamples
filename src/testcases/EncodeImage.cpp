@@ -8,8 +8,8 @@
 #include "src/threadworkers/FileReader.h"
 #include "src/threadworkers/FileWriter.h"
 
-#define INPUT_FILENAME "test.image.raw"
-#define OUTPUT_FILENAME "test.jpeg.encoded"
+#define INPUT_FILENAME "test.image.yuv"
+#define OUTPUT_FILENAME "test.omx.encoded.jpeg"
 
 using namespace std;
 
@@ -44,7 +44,7 @@ EncodeImage::DataClass::~DataClass()
 
 
 EncodeImage::EncodeImage()
-    : TestCase( TESTCASE_NAME_ENCODE_VIDEO )
+    : TestCase( TESTCASE_NAME_ENCODE_IMAGE )
 {
     d = new DataClass();
 }

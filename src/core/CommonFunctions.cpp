@@ -339,7 +339,7 @@ bool CommonFunctions::WriteBufferToFile( ofstream& outputFile, OMX_BUFFERHEADERT
         return false;
     }
 
-    outputFile.write( ( char* )buffer->pBuffer, buffer->nFilledLen );
+    //outputFile.write( ( char* )buffer->pBuffer, buffer->nFilledLen );
 
     if ( outputFile.good() == false ) {
         LOG_ERR( "write buffer to file failed" );

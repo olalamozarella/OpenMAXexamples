@@ -8,8 +8,8 @@
 #include "src/threadworkers/FileReader.h"
 #include "src/threadworkers/FileWriter.h"
 
-#define INPUT_FILENAME "test.video.raw"
-#define OUTPUT_FILENAME "test.h264.encoded"
+#define INPUT_FILENAME "test.video.yuv"
+#define OUTPUT_FILENAME "test.omx.encoded.h264"
 
 using namespace std;
 
@@ -100,6 +100,8 @@ void EncodeVideo::Run()
 
     LOG_INFO( "Actual decoder state: " + d->encoderComponent->GetComponentState() );
 
+    d->encoderComponent->GetVideoParameters( d->encoderComponent->OutputPort );
+
     ok = d->encoderComponent->SetVideoParameters();
     if ( ok == false ) {
         LOG_ERR( "Error setting decoder params" );
@@ -113,6 +115,54 @@ void EncodeVideo::Run()
     }
     d->inputBuffersCreated = true;
 
+    ok = d->encoderComponent->ChangeState( OMX_StateExecuting );
+    if ( ok == false ) {
+        LOG_ERR( "Error changing state to executing" );
+        return;
+    }
+
+    //feed some data
+    bool portSettingChangedOccured = false;
+    bool foundEOF = false;
+    while ( portSettingChangedOccured == false ) {
+        OMX_BUFFERHEADERTYPE* buffer;
+        ok = d->encoderComponent->WaitForInputBuffer( d->encoderComponent->InputPort, buffer );
+        if ( ( ok == false ) || ( buffer == NULL ) ) {
+            LOG_ERR( "Error get input buffer" );
+            break;
+        }
+
+        ok = CommonFunctions::ReadFileToBuffer( d->inputFile, buffer, foundEOF );
+        if ( ok == false ) {
+            // If reading fails, buffer is still empty and should be returned to component port-buffer collection.
+            LOG_ERR( "read file failed - adding buffer back to map" );
+            ok = d->encoderComponent->AddAllocatedBufferToMap( d->encoderComponent->InputPort, buffer );
+            if ( ok == false ) {
+                LOG_ERR( "Cannot add allocated buffer to map manually" );
+            }
+            break;
+        }
+
+        ok = d->encoderComponent->EmptyThisBuffer( buffer );
+        if ( ok == false ) {
+            // If reading fails, buffer is still empty and should be returned to component port-buffer collection.
+            LOG_ERR( "empty first buffer failed, adding buffer back to map" );
+            ok = d->encoderComponent->AddAllocatedBufferToMap( d->encoderComponent->InputPort, buffer );
+            if ( ok == false ) {
+                LOG_ERR( "Cannot add allocated buffer to map manually" );
+            }
+            break;
+        }
+
+        portSettingChangedOccured = d->encoderComponent->WaitForEvent( OMX_EventPortSettingsChanged, d->encoderComponent->OutputPort, 0, EVENT_HANDLER_TIMEOUT_MS_EXTENDED );
+    }
+
+    ok = d->encoderComponent->ChangeState( OMX_StateIdle );
+    if ( ok == false ) {
+        LOG_ERR( "Error changing state to executing" );
+        return;
+    }
+
     ok = d->encoderComponent->EnablePortBuffers( d->encoderComponent->OutputPort );
     if ( ok == false ) {
         LOG_ERR( "Error enabling output ports" );
@@ -125,6 +175,8 @@ void EncodeVideo::Run()
         LOG_ERR( "Error changing state to executing" );
         return;
     }
+
+    d->encoderComponent->GetVideoParameters( d->encoderComponent->OutputPort );
 
     FileWriter fileWriter( d->encoderComponent, &d->outputFile, d->encoderComponent->OutputPort );
     fileWriter.Start();

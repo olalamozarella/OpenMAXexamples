@@ -18,10 +18,6 @@
 #include "src/testcases/EncodeVideo.h"
 #include "src/testcases/DecodeImage.h"
 #include "src/testcases/EncodeImage.h"
-#include "ilclient.h"
-
-#define LOGGER_PRINT_INFO
-#define LOGGER_PRINT_WARN
 
 using namespace std;
 
@@ -51,10 +47,10 @@ int main()
 //    buffersNoIL.Run();
 //    buffersNoIL.Destroy();
 
-    VideoDecodeRender testcase;
-    testcase.Init();
-    testcase.Run();
-    testcase.Destroy();
+//    VideoDecodeRender testcase;
+//    testcase.Init();
+//    testcase.Run();
+//    testcase.Destroy();
 
 //    MPEG2Stuff testcase;
 //    testcase.Init();
@@ -81,10 +77,10 @@ int main()
 //    testcase.Run();
 //    testcase.Destroy();
 
-//    EncodeImage testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
+    EncodeImage testcase;
+    testcase.Init();
+    testcase.Run();
+    testcase.Destroy();
 
     LOG_INFO( "Main - Testcase finished" );
 

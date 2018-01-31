@@ -755,6 +755,29 @@ bool Component::AddAllocatedBufferToMap( const OMX_U32 port, OMX_BUFFERHEADERTYP
     return true;
 }
 
+bool Component::GetVideoParameters( const OMX_U32 port )
+{
+    OMX_VIDEO_PARAM_PORTFORMATTYPE videoformat;
+    CommonFunctions::InitStructure( videoformat );
+    videoformat.nPortIndex = port;
+
+    bool ok = GetParameter( OMX_IndexParamVideoPortFormat, &videoformat );
+    if ( ok == false ) {
+        LOG_ERR( GetComponentName() + ":Error setting video parameters" );
+        return false;
+    }
+
+    OMX_PARAM_PORTDEFINITIONTYPE portdef;
+    CommonFunctions::InitStructure( portdef );
+    portdef.nPortIndex = port;
+    ok = GetParameter( OMX_IndexParamPortDefinition, &portdef );
+    if ( ok == false ) {
+        return false;
+    }
+
+    return true;
+}
+
 string Component::GetComponentState()
 {
     return CommonFunctions::GetComponentState( d->componentHandle );
