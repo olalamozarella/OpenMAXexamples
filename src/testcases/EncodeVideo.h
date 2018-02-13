@@ -7,7 +7,7 @@ class EncodeVideo : public TestCase
 {
 public:
     EncodeVideo();
-    ~EncodeVideo();
+    virtual ~EncodeVideo();
 
     void Init();
     void Run();

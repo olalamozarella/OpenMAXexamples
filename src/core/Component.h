@@ -186,6 +186,8 @@ public:
 
     bool GetVideoParameters( const OMX_U32 port );
 
+    bool GetPortDefinition( const OMX_U32 port, OMX_PARAM_PORTDEFINITIONTYPE& portdef );
+
 private:
     class DataClass;
     DataClass* d;

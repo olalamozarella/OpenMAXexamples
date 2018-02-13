@@ -7,7 +7,7 @@ class ImageDecodeRender : public TestCase
 {
 public:
     ImageDecodeRender();
-    ~ImageDecodeRender();
+    virtual ~ImageDecodeRender();
 
     void Init();
     void Run();

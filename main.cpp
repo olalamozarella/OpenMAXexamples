@@ -18,6 +18,8 @@
 #include "src/testcases/EncodeVideo.h"
 #include "src/testcases/DecodeImage.h"
 #include "src/testcases/EncodeImage.h"
+#include "src/testcases/CameraRender.h"
+#include "src/testcases/CameraEncode.h"
 
 using namespace std;
 
@@ -31,53 +33,19 @@ int main()
     bcm_host_init();
 
 //    SystemInfo systemInfo;
-//    systemInfo.Run();
-
 //    ListComponents testCase;
-//    testCase.Run();
-
 //    PortInfo portInfo;
-//    portInfo.Run();
-
 //    NoBuffers noBuffers;
-//    noBuffers.Run();
-
 //    BuffersNoIL buffersNoIL;
-//    buffersNoIL.Init();
-//    buffersNoIL.Run();
-//    buffersNoIL.Destroy();
-
 //    VideoDecodeRender testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
-
 //    MPEG2Stuff testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
-
 //    ImageDecodeRender testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
-
 //    DecodeVideo testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
-
 //    EncodeVideo testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
-
 //    DecodeImage testcase;
-//    testcase.Init();
-//    testcase.Run();
-//    testcase.Destroy();
-
-    EncodeImage testcase;
+//    EncodeImage testcase;
+//    CameraRender testcase;
+    CameraEncode testcase;
     testcase.Init();
     testcase.Run();
     testcase.Destroy();

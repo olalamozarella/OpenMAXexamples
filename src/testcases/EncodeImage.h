@@ -7,7 +7,7 @@ class EncodeImage : public TestCase
 {
 public:
     EncodeImage();
-    ~EncodeImage();
+    virtual ~EncodeImage();
 
     void Init();
     void Run();

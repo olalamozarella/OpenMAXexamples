@@ -7,7 +7,7 @@ class MPEG2Stuff : public TestCase
 {
 public:
     MPEG2Stuff();
-    ~MPEG2Stuff();
+    virtual ~MPEG2Stuff();
 
     void Init();
     void Run();

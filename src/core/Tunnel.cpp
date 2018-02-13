@@ -18,17 +18,17 @@ Tunnel::~Tunnel()
 
 bool Tunnel::SetupTunnel()
 {
-    OMX_STATETYPE sourceState;
-    bool ok = source->GetState( sourceState );
-    if ( ok == false ) {
-        LOG_ERR( "error getting source component state" );
-        return false;
-    }
+//    OMX_STATETYPE sourceState;
+//    bool ok = source->GetState( sourceState );
+//    if ( ok == false ) {
+//        LOG_ERR( "error getting source component state" );
+//        return false;
+//    }
 
-    if ( sourceState == OMX_StateLoaded ) {
-        LOG_ERR( "Wrong component state" );
-        return false;
-    }
+//    if ( sourceState == OMX_StateLoaded ) {
+//        LOG_ERR( "Wrong component state" );
+//        return false;
+//    }
 
     OMX_ERRORTYPE err = OMX_SetupTunnel( source->GetHandle(), sourcePort, destination->GetHandle(), destinationPort );
     if ( err != OMX_ErrorNone ) {

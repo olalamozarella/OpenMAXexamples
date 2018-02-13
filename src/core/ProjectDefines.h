@@ -14,6 +14,8 @@
 #define TESTCASE_NAME_ENCODE_VIDEO              "EncodeVideo"
 #define TESTCASE_NAME_DECODE_VIDEO              "DecodeVideo"
 #define TESTCASE_NAME_DECODE_IMAGE              "DecodeImage"
+#define TESTCASE_NAME_CAMERA_RENDER             "CameraRender"
+#define TESTCASE_NAME_CAMERA_ENCODE             "CameraEncode"
 
 #define EVENT_HANDLER_TIMEOUT_MS_DEFAULT        5
 #define EVENT_HANDLER_TIMEOUT_MS_EXTENDED       10

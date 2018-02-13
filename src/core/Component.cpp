@@ -10,7 +10,6 @@
 #include "Callbacks.h"
 #include "CommonFunctions.h"
 #include "Logger.h"
-#include "Timer.h"
 #include "EventLocker.h"
 
 using namespace std;
@@ -775,6 +774,18 @@ bool Component::GetVideoParameters( const OMX_U32 port )
         return false;
     }
 
+    return true;
+}
+
+bool Component::GetPortDefinition( const OMX_U32 port, OMX_PARAM_PORTDEFINITIONTYPE& portdef )
+{
+    CommonFunctions::InitStructure( portdef );
+    portdef.nPortIndex = port;
+    OMX_ERRORTYPE err = OMX_GetParameter( GetHandle(), OMX_IndexParamPortDefinition, &portdef );
+    if ( err != OMX_ErrorNone ) {
+        LOG_ERR( GetComponentName() + ":OMX_GetParameter failed: " + CommonFunctions::ErrorToString( err ) );
+        return false;
+    }
     return true;
 }
 

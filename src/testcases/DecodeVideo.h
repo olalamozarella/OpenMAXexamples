@@ -7,7 +7,7 @@ class DecodeVideo : public TestCase
 {
 public:
     DecodeVideo();
-    ~DecodeVideo();
+    virtual ~DecodeVideo();
 
     void Init();
     void Run();

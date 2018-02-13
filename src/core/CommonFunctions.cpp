@@ -6,7 +6,18 @@
 #include <fstream>
 
 #include "IL/OMX_Component.h"
+#include "IL/OMX_Broadcom.h"
+
 #include "src/core/Logger.h"
+
+#define INIT_STRUCTURE(structure) \
+    memset( &structure, 0, sizeof( structure ) ); \
+    structure.nSize = sizeof( structure ); \
+    structure.nVersion.nVersion = OMX_VERSION; \
+    structure.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR; \
+    structure.nVersion.s.nVersionMinor = OMX_VERSION_MINOR; \
+    structure.nVersion.s.nRevision = OMX_VERSION_REVISION; \
+    structure.nVersion.s.nStep = OMX_VERSION_STEP \
 
 using namespace std;
 
@@ -223,47 +234,48 @@ bool CommonFunctions::DisableAllPorts( OMX_HANDLETYPE handle )
 
 void CommonFunctions::InitStructure( OMX_PORT_PARAM_TYPE& structure )
 {
-    memset( &structure, 0, sizeof( OMX_PORT_PARAM_TYPE ) );
-    structure.nSize = sizeof( OMX_PORT_PARAM_TYPE );
-    structure.nVersion.nVersion = OMX_VERSION;
-    structure.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
-    structure.nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
-    structure.nVersion.s.nRevision = OMX_VERSION_REVISION;
-    structure.nVersion.s.nStep = OMX_VERSION_STEP;
+    INIT_STRUCTURE( structure );
 }
 
 void CommonFunctions::InitStructure( OMX_PARAM_PORTDEFINITIONTYPE& structure )
 {
-    memset( &structure, 0, sizeof( OMX_PARAM_PORTDEFINITIONTYPE ) );
-    structure.nSize = sizeof( OMX_PARAM_PORTDEFINITIONTYPE );
-    structure.nVersion.nVersion = OMX_VERSION;
-    structure.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
-    structure.nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
-    structure.nVersion.s.nRevision = OMX_VERSION_REVISION;
-    structure.nVersion.s.nStep = OMX_VERSION_STEP;
+    INIT_STRUCTURE( structure );
 }
 
 
 void CommonFunctions::InitStructure( OMX_VIDEO_PARAM_PORTFORMATTYPE& structure )
 {
-    memset( &structure, 0, sizeof( OMX_VIDEO_PARAM_PORTFORMATTYPE ) );
-    structure.nSize = sizeof( OMX_VIDEO_PARAM_PORTFORMATTYPE );
-    structure.nVersion.nVersion = OMX_VERSION;
-    structure.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
-    structure.nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
-    structure.nVersion.s.nRevision = OMX_VERSION_REVISION;
-    structure.nVersion.s.nStep = OMX_VERSION_STEP;
+    INIT_STRUCTURE( structure );
 }
 
 void CommonFunctions::InitStructure( OMX_IMAGE_PARAM_PORTFORMATTYPE& structure )
 {
-    memset( &structure, 0, sizeof( OMX_IMAGE_PARAM_PORTFORMATTYPE ) );
-    structure.nSize = sizeof( OMX_IMAGE_PARAM_PORTFORMATTYPE );
-    structure.nVersion.nVersion = OMX_VERSION;
-    structure.nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
-    structure.nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
-    structure.nVersion.s.nRevision = OMX_VERSION_REVISION;
-    structure.nVersion.s.nStep = OMX_VERSION_STEP;
+    INIT_STRUCTURE( structure );
+}
+
+void CommonFunctions::InitStructure( OMX_CONFIG_REQUESTCALLBACKTYPE& structure )
+{
+    INIT_STRUCTURE( structure );
+}
+
+void CommonFunctions::InitStructure( OMX_PARAM_U32TYPE& structure )
+{
+    INIT_STRUCTURE( structure );
+}
+
+void CommonFunctions::InitStructure( OMX_CONFIG_PORTBOOLEANTYPE& structure )
+{
+    INIT_STRUCTURE( structure );
+}
+
+void CommonFunctions::InitStructure( OMX_VIDEO_PARAM_BITRATETYPE& structure )
+{
+    INIT_STRUCTURE( structure );
+}
+
+void CommonFunctions::InitStructure( OMX_CONFIG_FRAMERATETYPE& structure )
+{
+    INIT_STRUCTURE( structure );
 }
 
 string CommonFunctions::IntToString( int a )
@@ -339,7 +351,7 @@ bool CommonFunctions::WriteBufferToFile( ofstream& outputFile, OMX_BUFFERHEADERT
         return false;
     }
 
-    //outputFile.write( ( char* )buffer->pBuffer, buffer->nFilledLen );
+    outputFile.write( ( char* )buffer->pBuffer, buffer->nFilledLen );
 
     if ( outputFile.good() == false ) {
         LOG_ERR( "write buffer to file failed" );

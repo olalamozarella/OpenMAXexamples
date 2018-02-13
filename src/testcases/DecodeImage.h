@@ -10,7 +10,7 @@ class DecodeImage : public TestCase
 {
 public:
     DecodeImage();
-    ~DecodeImage();
+    virtual ~DecodeImage();
 
     void Init();
     void Run();

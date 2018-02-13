@@ -63,3 +63,49 @@ bool EncoderH264::SetVideoParameters()
 
     return true;
 }
+
+bool EncoderH264::SetVideoParametersForCamera( const OMX_PARAM_PORTDEFINITIONTYPE& cameraPortdef )
+{
+    OMX_PARAM_PORTDEFINITIONTYPE portdefOutput;
+    CommonFunctions::InitStructure( portdefOutput );
+    portdefOutput.nPortIndex = OutputPort;
+    bool ok = GetParameter( OMX_IndexParamPortDefinition, &portdefOutput );
+    if ( ok == false ) {
+        LOG_ERR( "Error get portdef" );
+        return false;
+    }
+
+    portdefOutput.format.video.nFrameWidth = cameraPortdef.format.video.nFrameWidth;
+    portdefOutput.format.video.nFrameHeight = cameraPortdef.format.video.nFrameHeight;
+    portdefOutput.format.video.xFramerate = cameraPortdef.format.video.xFramerate;
+    portdefOutput.format.video.nStride = cameraPortdef.format.video.nStride;
+    portdefOutput.format.video.nBitrate = cameraPortdef.format.video.nBitrate;
+    ok = SetParameter( OMX_IndexParamPortDefinition, &portdefOutput );
+    if ( ok == false ) {
+        LOG_ERR( GetComponentName() + ":Error setting encoder portdef" );
+        return false;
+    }
+
+//    OMX_VIDEO_PARAM_BITRATETYPE bitrate;
+//    CommonFunctions::InitStructure( bitrate );
+//    bitrate.eControlRate = OMX_Video_ControlRateVariable;
+//    bitrate.nTargetBitrate = portdefOutput.format.video.nBitrate;
+//    bitrate.nPortIndex = OutputPort;
+//    ok = SetParameter( OMX_IndexParamVideoBitrate, &bitrate );
+//    if ( ok == false ) {
+//        LOG_ERR( GetComponentName() + ":Error setting encoder bitrate" );
+//        return false;
+//    }
+
+    OMX_VIDEO_PARAM_PORTFORMATTYPE format;
+    CommonFunctions::InitStructure( format );
+    format.nPortIndex = OutputPort;
+    format.eCompressionFormat = OMX_VIDEO_CodingAVC;
+    ok = SetParameter( OMX_IndexParamVideoPortFormat, &format );
+    if ( ok == false ) {
+        LOG_ERR( GetComponentName() + ":Error setting encoder format" );
+        return false;
+    }
+
+    return true;
+}
