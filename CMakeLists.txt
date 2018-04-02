@@ -15,12 +15,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 # Compile flags
-#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Debug)
 set(COMPILE_DEFINITIONS -Werror)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DRASPBERRYPI -DOMX_SKIP64BIT")
-
-# Set library name
-set( LIB_NAME OMXHelperLib )
 
 # header files for library
 set( LIB_HEADERS
@@ -99,17 +96,19 @@ set( BINARY_SOURCES
 )
 
 # Create library with core&components
-#add_library(
-#    ${LIB_NAME}
-#    SHARED
-#    ${LIB_HEADERS}
-#    ${LIB_SOURCES}
-#)
+set(LIBRARY_NAME OmxHelperLib)
+add_library(
+    ${LIBRARY_NAME}
+    SHARED
+    ${LIB_HEADERS}
+    ${LIB_SOURCES}
+)
+
+install(TARGETS ${LIBRARY_NAME} DESTINATION lib)
+install(FILES ${LIB_HEADERS} DESTINATION include)
 
 # Create executable with all necessary source and header files
 add_executable(${PROJECT_NAME}
-    ${LIB_HEADERS}
-    ${LIB_SOURCES}
     ${BINARY_HEADERS}
     ${BINARY_SOURCES}
 )
@@ -131,7 +130,7 @@ TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libbcm_host.so
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libopenmaxil.so
   Threads::Threads
-#  ${LIB_NAME}
+  ${LIBRARY_NAME}
 )
 
 link_directories( ${CMAKE_CURRENT_BINARY_DIR} )
