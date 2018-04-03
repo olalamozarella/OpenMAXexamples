@@ -7,8 +7,9 @@
 #Add external libraries with TARGET_LINK_LIBRARIES()
 
 cmake_minimum_required(VERSION 3.1)
-
 project(cmake-test-qtcreator)
+set(CMAKE_INSTALL_PREFIX ".")
+set(CMAKE_INSTALL_RPATH "$ORIGIN/")
 
 # Useful CMake options for Qt projects
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -64,73 +65,71 @@ set( LIB_SOURCES
     src/components/Camera.cpp
 )
 
-# List of all header files that belong to this project
-set( BINARY_HEADERS
-    src/testcases/TestCase.h
-    src/testcases/VideoDecodeRender.h
-    src/testcases/ImageDecodeRender.h
-    src/testcases/MPEG2Stuff.h
-    src/testcases/EncodeImage.h
-    src/testcases/DecodeImage.h
-    src/testcases/EncodeVideo.h
-    src/testcases/DecodeVideo.h
-    src/testcases/CameraRender.h
-    src/testcases/CameraEncode.h
-)
-
-# List of all source files that belong to this project
-set( BINARY_SOURCES
-    main.cpp
-    src/testcases/TestCase.cpp
-    src/testcases/VideoDecodeRender.cpp
-    src/testcases/ImageDecodeRender.cpp
-    src/testcases/MPEG2Stuff.cpp
-    src/testcases/EncodeImage.cpp
-    src/testcases/DecodeImage.cpp
-    src/testcases/EncodeVideo.cpp
-    src/testcases/DecodeVideo.cpp
-    src/testcases/DecodeVideoNullSink.cpp
-    src/testcases/EncodeVideoNullSink.cpp
-    src/testcases/CameraRender.cpp
-    src/testcases/CameraEncode.cpp
-)
-
 # Create library with core&components
 set(LIBRARY_NAME OmxHelperLib)
-add_library(
-    ${LIBRARY_NAME}
-    SHARED
-    ${LIB_HEADERS}
-    ${LIB_SOURCES}
-)
-
-install(TARGETS ${LIBRARY_NAME} DESTINATION lib)
+add_library(${LIBRARY_NAME} SHARED ${LIB_HEADERS} ${LIB_SOURCES})
+install(TARGETS ${LIBRARY_NAME} DESTINATION bin)
 install(FILES ${LIB_HEADERS} DESTINATION include)
 
-# Create executable with all necessary source and header files
-add_executable(${PROJECT_NAME}
-    ${BINARY_HEADERS}
-    ${BINARY_SOURCES}
-)
+# List of all header files that belong to this project
+#set( BINARY_HEADERS
+#    src/testcases/VideoDecodeRender.h
+#    src/testcases/ImageDecodeRender.h
+#    src/testcases/MPEG2Stuff.h
+#    src/testcases/DecodeVideoNullSink.h
+#    src/testcases/EncodeVideoNullSink.h
+#)
+
+# List of all source files that belong to this project
+#set( BINARY_SOURCES
+#    main.cpp
+#    src/testcases/VideoDecodeRender.cpp
+#    src/testcases/ImageDecodeRender.cpp
+#    src/testcases/MPEG2Stuff.cpp
+#    src/testcases/DecodeVideoNullSink.cpp
+#    src/testcases/EncodeVideoNullSink.cpp
+#)
+
+# Create executables for individual testcases
+add_executable(CameraRender src/testcases/CameraRender.h src/testcases/CameraRender.cpp)
+install(TARGETS CameraRender DESTINATION bin)
+target_link_libraries( CameraRender ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libbcm_host.so
+    ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libopenmaxil.so Threads::Threads ${LIBRARY_NAME})
+
+add_executable(CameraEncode src/testcases/CameraEncode.h src/testcases/CameraEncode.cpp)
+install(TARGETS CameraEncode DESTINATION bin)
+target_link_libraries( CameraEncode ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libbcm_host.so
+    ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libopenmaxil.so Threads::Threads ${LIBRARY_NAME})
+
+add_executable(EncodeImage src/testcases/EncodeImage.h src/testcases/EncodeImage.cpp)
+install(TARGETS EncodeImage DESTINATION bin)
+target_link_libraries( EncodeImage ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libbcm_host.so
+    ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libopenmaxil.so Threads::Threads ${LIBRARY_NAME})
+
+add_executable(DecodeImage src/testcases/DecodeImage.h src/testcases/DecodeImage.cpp)
+install(TARGETS DecodeImage DESTINATION bin)
+target_link_libraries( DecodeImage ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libbcm_host.so
+    ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libopenmaxil.so Threads::Threads ${LIBRARY_NAME})
+
+add_executable(EncodeVideo src/testcases/EncodeVideo.h src/testcases/EncodeVideo.cpp)
+install(TARGETS EncodeVideo DESTINATION bin)
+target_link_libraries( EncodeVideo ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libbcm_host.so
+    ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libopenmaxil.so Threads::Threads ${LIBRARY_NAME})
+
+add_executable(DecodeVideo src/testcases/DecodeVideo.h src/testcases/DecodeVideo.cpp)
+install(TARGETS DecodeVideo DESTINATION bin)
+target_link_libraries( DecodeVideo ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libbcm_host.so
+    ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libopenmaxil.so Threads::Threads ${LIBRARY_NAME})
 
 # pthreads things
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # Include directories
-INCLUDE_DIRECTORIES(
+include_directories(
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/include
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/include/interface/vcos/pthreads
   ${CMAKE_FIND_ROOT_PATH}/opt/vc/include/interface/vmcs_host/linux
-  ${CMAKE_FIND_ROOT_PATH}/opt/vc/src/hello_pi/libs/ilclient/
-)
-
-# Link all needed libraries
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
-  ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libbcm_host.so
-  ${CMAKE_FIND_ROOT_PATH}/opt/vc/lib/libopenmaxil.so
-  Threads::Threads
-  ${LIBRARY_NAME}
 )
 
 link_directories( ${CMAKE_CURRENT_BINARY_DIR} )

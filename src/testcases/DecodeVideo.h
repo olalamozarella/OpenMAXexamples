@@ -1,9 +1,7 @@
 #ifndef DECODEVIDEO_H
 #define DECODEVIDEO_H
 
-#include "TestCase.h"
-
-class DecodeVideo : public TestCase
+class DecodeVideo
 {
 public:
     DecodeVideo();

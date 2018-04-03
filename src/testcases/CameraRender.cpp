@@ -1,7 +1,11 @@
 #include "CameraRender.h"
 
 #include <unistd.h>
+#include <string>
 
+#include "bcm_host.h"
+
+#include "src/core/ProjectDefines.h"
 #include "src/core/Logger.h"
 #include "src/core/CommonFunctions.h"
 #include "src/core/Tunnel.h"
@@ -10,6 +14,8 @@
 #include "src/components/NullSink.h"
 
 #define CAPTURING_TIME_SECONDS 5
+
+using namespace std;
 
 class CameraRender::DataClass
 {
@@ -23,7 +29,6 @@ public:
 };
 
 CameraRender::CameraRender()
-    : TestCase( TESTCASE_NAME_CAMERA_RENDER )
 {
     d = new DataClass();
     d->camera = new Camera();
@@ -51,8 +56,6 @@ void CameraRender::Init()
 
 void CameraRender::Run()
 {
-    TestCase::Run();
-
     bool ok = d->camera->Init();
     ASSERT( ok == false, "Error init component, destroying.." );
 
@@ -141,4 +144,24 @@ void CameraRender::Destroy()
         return;
     }
     LOG_INFO( "OMX_Deinit successful" );
+}
+
+int main()
+{
+    struct timespec start, finish;
+    LOG_INFO( "Starting testcase" );
+    clock_gettime( CLOCK_MONOTONIC, &start );
+    bcm_host_init();
+
+    CameraRender testcase;
+    testcase.Init();
+    testcase.Run();
+    testcase.Destroy();
+
+    bcm_host_deinit();
+    clock_gettime( CLOCK_MONOTONIC, &finish );
+
+    double elapsed = finish.tv_sec - start.tv_sec;
+    elapsed += ( finish.tv_nsec - start.tv_nsec ) / 1000000000.0;
+    LOG_INFO( "Testcase finished, total time: " + FLOAT2STR( elapsed ) );
 }

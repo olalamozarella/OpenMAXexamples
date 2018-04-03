@@ -1,9 +1,7 @@
 #ifndef CAMERAENCODE_H
 #define CAMERAENCODE_H
 
-#include "TestCase.h"
-
-class CameraEncode : public TestCase
+class CameraEncode
 {
 public:
     CameraEncode();

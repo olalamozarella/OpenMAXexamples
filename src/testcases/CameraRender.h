@@ -1,9 +1,7 @@
 #ifndef CAMERARENDER_H
 #define CAMERARENDER_H
 
-#include "TestCase.h"
-
-class CameraRender : public TestCase
+class CameraRender
 {
 public:
     CameraRender();

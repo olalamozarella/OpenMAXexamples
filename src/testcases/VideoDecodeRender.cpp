@@ -77,8 +77,6 @@ void VideoDecodeRender::Init()
 
 void VideoDecodeRender::Run()
 {
-    TestCase::Run();
-
     bool ok = d->decoder->Init();
     if ( ok == false ) {
         LOG_ERR( "Error init component, destroying.." );

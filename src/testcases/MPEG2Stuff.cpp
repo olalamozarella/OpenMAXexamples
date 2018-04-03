@@ -116,8 +116,6 @@ void MPEG2Stuff::Init()
 
 void MPEG2Stuff::Run()
 {
-    TestCase::Run();
-
     bool ok = d->decoder->Init();
     if ( ok == false ) {
         LOG_ERR( "Error init component, destroying.." );

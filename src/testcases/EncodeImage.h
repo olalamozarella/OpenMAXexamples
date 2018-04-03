@@ -1,9 +1,7 @@
 #ifndef ENCODEIMAGE_H
 #define ENCODEIMAGE_H
 
-#include "TestCase.h"
-
-class EncodeImage : public TestCase
+class EncodeImage
 {
 public:
     EncodeImage();

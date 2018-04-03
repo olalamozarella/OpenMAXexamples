@@ -1,7 +1,9 @@
 #include "DecodeVideo.h"
 
 #include <fstream>
+#include "bcm_host.h"
 
+#include "src/core/ProjectDefines.h"
 #include "src/core/CommonFunctions.h"
 #include "src/core/Logger.h"
 #include "src/core/Tunnel.h"
@@ -41,7 +43,6 @@ DecodeVideo::DataClass::~DataClass()
 }
 
 DecodeVideo::DecodeVideo()
-    : TestCase( TESTCASE_NAME_DECODE_VIDEO )
 {
     d = new DataClass();
     d->decoder = new DecoderH264();
@@ -83,8 +84,6 @@ void DecodeVideo::Init()
 
 void DecodeVideo::Run()
 {
-    TestCase::Run();
-
     bool ok = d->decoder->Init();
     if ( ok == false ) {
         LOG_ERR( "Error init component, destroying.." );
@@ -226,4 +225,24 @@ void DecodeVideo::Destroy()
     }
 
     LOG_INFO( "OMX_Deinit successful" );
+}
+
+int main()
+{
+    struct timespec start, finish;
+    LOG_INFO( "Starting testcase" );
+    clock_gettime( CLOCK_MONOTONIC, &start );
+    bcm_host_init();
+
+    DecodeVideo testcase;
+    testcase.Init();
+    testcase.Run();
+    testcase.Destroy();
+
+    bcm_host_deinit();
+    clock_gettime( CLOCK_MONOTONIC, &finish );
+
+    double elapsed = finish.tv_sec - start.tv_sec;
+    elapsed += ( finish.tv_nsec - start.tv_nsec ) / 1000000000.0;
+    LOG_INFO( "Testcase finished, total time: " + FLOAT2STR( elapsed ) );
 }

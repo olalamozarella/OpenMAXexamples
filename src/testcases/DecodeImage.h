@@ -1,12 +1,10 @@
 #ifndef DECODEIMAGE_H
 #define DECODEIMAGE_H
 
-#include "TestCase.h"
-
 /**
  * @brief class DecodeImage - decodes image to raw image data. Input file format has to be decode-able by member decoder component.
  */
-class DecodeImage : public TestCase
+class DecodeImage
 {
 public:
     DecodeImage();
