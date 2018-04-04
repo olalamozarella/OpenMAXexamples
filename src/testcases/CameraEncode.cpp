@@ -252,6 +252,15 @@ void CameraEncode::Destroy()
 
 int main( int argc, char* argv[] )
 {
+    if ( argc > 1 ) {
+        string arg = argv[1];
+        if ( arg == "-h" ) {
+            cout << "This application encodes video from camera component into H264 format. Output file name and capture duration should be passed in parameter." << endl;
+            cout << "Usage: ./CameraEncode <output file> <duration>" << endl;
+            return 0;
+        }
+    }
+
     if ( argc < 3 ) {
         cout << "Too few parameters! Usage: ./CameraEncode <output file> <duration>" << endl;
         return -1;
@@ -259,8 +268,7 @@ int main( int argc, char* argv[] )
 
     istringstream iss( argv[2] );
     long duration = 0;
-    if ( !( iss >> duration ) )
-    {
+    if ( !( iss >> duration ) ) {
         LOG_ERR( "Cannot parse number from parameter, using default value" );
         duration = DEFAULT_DURATION;
     }

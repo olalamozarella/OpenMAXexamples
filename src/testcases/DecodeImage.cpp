@@ -223,6 +223,15 @@ void DecodeImage::Destroy()
 
 int main( int argc, char* argv[] )
 {
+    if ( argc > 1 ) {
+        string arg = argv[1];
+        if ( arg == "-h" ) {
+            cout << "This application decodes JPEG image into raw image data. Input and output file paths should be passed as parameters." << endl;
+            cout << "Usage: ./DecodeImage <input file> <output file>" << endl;
+            return 0;
+        }
+    }
+
     if ( argc < 3 ) {
         cout << "Too few parameters! Usage: ./DecodeImage <input file> <output file>" << endl;
         return -1;

@@ -228,6 +228,15 @@ void EncodeVideo::Destroy()
 
 int main( int argc, char* argv[] )
 {
+    if ( argc > 1 ) {
+        string arg = argv[1];
+        if ( arg == "-h" ) {
+            cout << "This application encodes raw video data into H264 video. Input and output file paths should be passed as parameters." << endl;
+            cout << "Usage: ./EncodeVideo <input file> <output file>" << endl;
+            return 0;
+        }
+    }
+
     if ( argc < 3 ) {
         cout << "Too few parameters! Usage: ./EncodeVideo <input file> <output file>" << endl;
         return -1;

@@ -176,6 +176,15 @@ void EncodeImage::Destroy()
 
 int main( int argc, char* argv[] )
 {
+    if ( argc > 1 ) {
+        string arg = argv[1];
+        if ( arg == "-h" ) {
+            cout << "This application encodes raw image data into JPEG image. Input and output file paths should be passed as parameters." << endl;
+            cout << "Usage: ./EncodeImage <input file> <output file>" << endl;
+            return 0;
+        }
+    }
+
     if ( argc < 3 ) {
         cout << "Too few parameters! Usage: ./EncodeImage <input file> <output file>" << endl;
         return -1;

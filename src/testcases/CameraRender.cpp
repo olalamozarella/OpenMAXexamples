@@ -151,6 +151,15 @@ void CameraRender::Destroy()
 
 int main( int argc, char* argv[] )
 {
+    if ( argc > 1 ) {
+        string arg = argv[1];
+        if ( arg == "-h" ) {
+            cout << "This application captures video from camera component and renders it using renderer component. Capture duration should be passed in parameter." << endl;
+            cout << "Usage: ./CameraRender <duration>" << endl;
+            return 0;
+        }
+    }
+
     if ( argc < 2 ) {
         cout << "Too few parameters! Usage: ./CameraRender <duration>" << endl;
         return -1;
