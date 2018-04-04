@@ -1,14 +1,16 @@
 #ifndef CAMERAENCODE_H
 #define CAMERAENCODE_H
 
+#include <string>
+
 class CameraEncode
 {
 public:
     CameraEncode();
     virtual ~CameraEncode();
 
-    void Init();
-    void Run();
+    bool Init( std::string outputFileName );
+    void Run( const long duration );
     void Destroy();
 
 private:

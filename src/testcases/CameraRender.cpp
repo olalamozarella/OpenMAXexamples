@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include <string>
+#include <sstream>
 
 #include "bcm_host.h"
 
@@ -13,7 +14,7 @@
 #include "src/components/VideoRenderer.h"
 #include "src/components/NullSink.h"
 
-#define CAPTURING_TIME_SECONDS 5
+#define DEFAULT_DURATION 10
 
 using namespace std;
 
@@ -44,17 +45,19 @@ CameraRender::~CameraRender()
     delete d;
 }
 
-void CameraRender::Init()
+bool CameraRender::Init()
 {
     OMX_ERRORTYPE err = OMX_Init();
     if ( err != OMX_ErrorNone ) {
         LOG_ERR( "OMX_Init failed" + CommonFunctions::ErrorToString( err ) );
-        return;
+        return false;
     }
+
     LOG_INFO( "OMX_Init successful" );
+    return true;
 }
 
-void CameraRender::Run()
+void CameraRender::Run( const long duration )
 {
     bool ok = d->camera->Init();
     ASSERT( ok == false, "Error init component, destroying.." );
@@ -116,8 +119,8 @@ void CameraRender::Run()
     ASSERT( ok == false, "Error start capturing" );
 
     /* LOOP */
-    LOG_INFO_VERBOSE( "Arrived at loop" );
-    usleep( CAPTURING_TIME_SECONDS * 1000 * 1000 );
+    LOG_INFO_VERBOSE( "Arrived at waiting loop" );
+    usleep( duration * 1000 * 1000 );
     LOG_INFO_VERBOSE( "Wake up" );
 
     /* FINISHING RUN */
@@ -146,8 +149,21 @@ void CameraRender::Destroy()
     LOG_INFO( "OMX_Deinit successful" );
 }
 
-int main()
+int main( int argc, char* argv[] )
 {
+    if ( argc < 2 ) {
+        cout << "Too few parameters! Usage: ./CameraRender <duration>" << endl;
+        return -1;
+    }
+
+    istringstream iss( argv[1] );
+    long duration = 0;
+    if ( !( iss >> duration ) )
+    {
+        LOG_ERR( "Cannot parse number from parameter, using default value" );
+        duration = DEFAULT_DURATION;
+    }
+
     struct timespec start, finish;
     LOG_INFO( "Starting testcase" );
     clock_gettime( CLOCK_MONOTONIC, &start );
@@ -155,7 +171,7 @@ int main()
 
     CameraRender testcase;
     testcase.Init();
-    testcase.Run();
+    testcase.Run( duration );
     testcase.Destroy();
 
     bcm_host_deinit();

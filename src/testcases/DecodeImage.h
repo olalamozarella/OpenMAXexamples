@@ -1,8 +1,10 @@
 #ifndef DECODEIMAGE_H
 #define DECODEIMAGE_H
 
+#include <string>
+
 /**
- * @brief class DecodeImage - decodes image to raw image data. Input file format has to be decode-able by member decoder component.
+ * @brief class DecodeImage - decodes image to raw image data. Input file format has to be decode-able by decoder component.
  */
 class DecodeImage
 {
@@ -10,7 +12,7 @@ public:
     DecodeImage();
     virtual ~DecodeImage();
 
-    void Init();
+    bool Init( std::string inputFileName, std::string outputFileName );
     void Run();
     void Destroy();
 

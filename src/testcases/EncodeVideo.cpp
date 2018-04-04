@@ -10,9 +10,6 @@
 #include "src/threadworkers/FileReader.h"
 #include "src/threadworkers/FileWriter.h"
 
-#define INPUT_FILENAME "test.video.yuv"
-#define OUTPUT_FILENAME "test.omx.encoded.h264"
-
 using namespace std;
 
 class EncodeVideo::DataClass
@@ -55,32 +52,33 @@ EncodeVideo::~EncodeVideo()
     delete d;
 }
 
-void EncodeVideo::Init()
+bool EncodeVideo::Init( string inputFileName, string outputFileName )
 {
-    OMX_ERRORTYPE err = OMX_Init();
-    if ( err != OMX_ErrorNone ) {
-        LOG_ERR( "OMX_Init failed" + CommonFunctions::ErrorToString( err ) );
-        return;
-    }
-    LOG_INFO( "OMX_Init successful" );
-
-    d->inputFile.open( INPUT_FILENAME, ios::in | ios::binary );
-    if ( d->inputFile.is_open() == false ) {
+    d->inputFile.open( inputFileName, ios::in | ios::binary );
+    if ( ( d->inputFile.good() == false ) || ( d->inputFile.is_open() == false ) ) {
         LOG_ERR( "Cannot open input file" );
-        return;
+        return false;
     }
 
     d->inputFile.seekg( 0, ios::end );
     d->remainingFileSize = d->inputFile.tellg();
     d->inputFile.seekg( 0, ios::beg );
+    LOG_INFO( "Input file opened, size: " + INT2STR( d->remainingFileSize ) );
 
-    d->outputFile.open( OUTPUT_FILENAME, ios::out | ios::binary );
+    d->outputFile.open( outputFileName, ios::out | ios::binary );
     if ( d->outputFile.is_open() == false ) {
-        LOG_ERR( "Cannot open input file" );
-        return;
+        LOG_ERR( "Cannot open output file" );
+        return false;
     }
 
-    LOG_INFO( "File opened, size: " + INT2STR( d->remainingFileSize ) );
+    OMX_ERRORTYPE err = OMX_Init();
+    if ( err != OMX_ErrorNone ) {
+        LOG_ERR( "OMX_Init failed" + CommonFunctions::ErrorToString( err ) );
+        return false;
+    }
+
+    LOG_INFO( "OMX_Init successful" );
+    return true;
 }
 
 void EncodeVideo::Run()
@@ -228,15 +226,23 @@ void EncodeVideo::Destroy()
     LOG_INFO( "OMX_Deinit successful" );
 }
 
-int main()
+int main( int argc, char* argv[] )
 {
+    if ( argc < 3 ) {
+        cout << "Too few parameters! Usage: ./EncodeVideo <input file> <output file>" << endl;
+        return -1;
+    }
+
     struct timespec start, finish;
     LOG_INFO( "Starting testcase" );
     clock_gettime( CLOCK_MONOTONIC, &start );
     bcm_host_init();
 
     EncodeVideo testcase;
-    testcase.Init();
+    bool ok = testcase.Init( argv[1], argv[2] );
+    if ( ok == false ) {
+        return -1;
+    }
     testcase.Run();
     testcase.Destroy();
 

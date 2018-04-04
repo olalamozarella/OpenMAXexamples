@@ -7,8 +7,8 @@ public:
     CameraRender();
     virtual ~CameraRender();
 
-    void Init();
-    void Run();
+    bool Init();
+    void Run( const long duration );
     void Destroy();
 
 private:

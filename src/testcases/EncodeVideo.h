@@ -1,13 +1,15 @@
 #ifndef ENCODEVIDEO_H
 #define ENCODEVIDEO_H
 
+#include <string>
+
 class EncodeVideo
 {
 public:
     EncodeVideo();
     virtual ~EncodeVideo();
 
-    void Init();
+    bool Init( std::string inputFileName, std::string outputFileName );
     void Run();
     void Destroy();
 

@@ -1,13 +1,15 @@
 #ifndef DECODEVIDEO_H
 #define DECODEVIDEO_H
 
+#include <string>
+
 class DecodeVideo
 {
 public:
     DecodeVideo();
     virtual ~DecodeVideo();
 
-    void Init();
+    bool Init( std::string inputFileName, std::string outputFileName );
     void Run();
     void Destroy();
 

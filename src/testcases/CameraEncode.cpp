@@ -1,6 +1,7 @@
 #include "CameraEncode.h"
 
 #include <fstream>
+#include <sstream>
 #include <unistd.h>
 #include "bcm_host.h"
 
@@ -13,9 +14,7 @@
 #include "src/components/NullSink.h"
 #include "src/threadworkers/FileWriter.h"
 
-#define OUTPUT_FILENAME "test.camera.encoded.h264"
-#define CAPTURING_TIME_SECONDS 5
-
+#define DEFAULT_DURATION 10
 using namespace std;
 
 class CameraEncode::DataClass
@@ -50,23 +49,25 @@ CameraEncode::~CameraEncode()
     delete d;
 }
 
-void CameraEncode::Init()
+bool CameraEncode::Init( string outputFileName )
 {
+    d->outputFile.open( outputFileName, ios::out | ios::binary );
+    if ( d->outputFile.is_open() == false ) {
+        LOG_ERR( "Cannot open input file" );
+        return false;
+    }
+
     OMX_ERRORTYPE err = OMX_Init();
     if ( err != OMX_ErrorNone ) {
         LOG_ERR( "OMX_Init failed" + CommonFunctions::ErrorToString( err ) );
-        return;
+        return false;
     }
-    LOG_INFO( "OMX_Init successful" );
 
-    d->outputFile.open( OUTPUT_FILENAME, ios::out | ios::binary );
-    if ( d->outputFile.is_open() == false ) {
-        LOG_ERR( "Cannot open input file" );
-        return;
-    }
+    LOG_INFO( "OMX_Init successful" );
+    return true;
 }
 
-void CameraEncode::Run()
+void CameraEncode::Run( const long duration )
 {
     bool ok = d->camera->Init();
     if ( ok == false ) {
@@ -218,9 +219,7 @@ void CameraEncode::Run()
     FileWriter fileWriter( d->encoder, &d->outputFile, EncoderH264::OutputPort );
     fileWriter.Start();
 
-    for ( int i = 12; i > 0; i-- ) {
-        usleep( CAPTURING_TIME_SECONDS * 1000 * 1000 );
-    }
+    usleep( duration * 1000 * 1000 );
 
     fileWriter.Stop();
 
@@ -251,16 +250,29 @@ void CameraEncode::Destroy()
     LOG_INFO( "OMX_Deinit successful" );
 }
 
-int main()
+int main( int argc, char* argv[] )
 {
+    if ( argc < 3 ) {
+        cout << "Too few parameters! Usage: ./CameraEncode <output file> <duration>" << endl;
+        return -1;
+    }
+
+    istringstream iss( argv[2] );
+    long duration = 0;
+    if ( !( iss >> duration ) )
+    {
+        LOG_ERR( "Cannot parse number from parameter, using default value" );
+        duration = DEFAULT_DURATION;
+    }
+
     struct timespec start, finish;
     LOG_INFO( "Starting testcase" );
     clock_gettime( CLOCK_MONOTONIC, &start );
     bcm_host_init();
 
     CameraEncode testcase;
-    testcase.Init();
-    testcase.Run();
+    testcase.Init( argv[1] );
+    testcase.Run( duration );
     testcase.Destroy();
 
     bcm_host_deinit();

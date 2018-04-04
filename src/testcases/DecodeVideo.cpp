@@ -11,9 +11,6 @@
 #include "src/threadworkers/FileReader.h"
 #include "src/threadworkers/FileWriter.h"
 
-#define FILENAME "test.h264"
-#define OUTPUT_FILENAME "test.omx.yuv"
-
 using namespace std;
 
 class DecodeVideo::DataClass
@@ -54,32 +51,33 @@ DecodeVideo::~DecodeVideo()
     delete d;
 }
 
-void DecodeVideo::Init()
+bool DecodeVideo::Init( string inputFileName, string outputFileName )
 {
-    OMX_ERRORTYPE err = OMX_Init();
-    if ( err != OMX_ErrorNone ) {
-        LOG_ERR( "OMX_Init failed" + CommonFunctions::ErrorToString( err ) );
-        return;
-    }
-    LOG_INFO( "OMX_Init successful" );
-
-    d->inputFile.open( FILENAME, ios::in | ios::binary );
-    if ( d->inputFile.is_open() == false ) {
+    d->inputFile.open( inputFileName, ios::in | ios::binary );
+    if ( ( d->inputFile.good() == false ) || ( d->inputFile.is_open() == false ) ) {
         LOG_ERR( "Cannot open input file" );
-        return;
+        return false;
     }
 
     d->inputFile.seekg( 0, ios::end );
     d->remainingFileSize = d->inputFile.tellg();
     d->inputFile.seekg( 0, ios::beg );
+    LOG_INFO( "File opened, size: " + INT2STR( d->remainingFileSize ) );
 
-    d->outputFile.open( OUTPUT_FILENAME, ios::out | ios::binary );
+    d->outputFile.open( outputFileName, ios::out | ios::binary );
     if ( d->outputFile.is_open() == false ) {
         LOG_ERR( "Cannot open input file" );
-        return;
+        return false;
     }
 
-    LOG_INFO( "File opened, size: " + INT2STR( d->remainingFileSize ) );
+    OMX_ERRORTYPE err = OMX_Init();
+    if ( err != OMX_ErrorNone ) {
+        LOG_ERR( "OMX_Init failed" + CommonFunctions::ErrorToString( err ) );
+        return false;
+    }
+
+    LOG_INFO( "OMX_Init successful" );
+    return true;
 }
 
 void DecodeVideo::Run()
@@ -227,15 +225,23 @@ void DecodeVideo::Destroy()
     LOG_INFO( "OMX_Deinit successful" );
 }
 
-int main()
+int main( int argc, char* argv[] )
 {
+    if ( argc < 3 ) {
+        cout << "Too few parameters! Usage: ./DecodeVideo <input file> <output file>" << endl;
+        return -1;
+    }
+
     struct timespec start, finish;
     LOG_INFO( "Starting testcase" );
     clock_gettime( CLOCK_MONOTONIC, &start );
     bcm_host_init();
 
     DecodeVideo testcase;
-    testcase.Init();
+    bool ok = testcase.Init( argv[1], argv[2] );
+    if ( ok == false ) {
+        return -1;
+    }
     testcase.Run();
     testcase.Destroy();
 

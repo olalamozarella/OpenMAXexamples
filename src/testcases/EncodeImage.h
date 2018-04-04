@@ -1,13 +1,15 @@
 #ifndef ENCODEIMAGE_H
 #define ENCODEIMAGE_H
 
+#include <string>
+
 class EncodeImage
 {
 public:
     EncodeImage();
     virtual ~EncodeImage();
 
-    void Init();
+    bool Init( std::string inputFileName, std::string outputFileName );
     void Run();
     void Destroy();
 
